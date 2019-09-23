@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 学习网络安全协议的时候用到了很多现代密码学的知识，也重新去学习了现代密码学的应用。想要有体系的整理在这里。">
+<meta name="keywords" content="crypto">
+<meta property="og:type" content="article">
+<meta property="og:title" content="密码学小整理">
+<meta property="og:url" content="https://hustcw.github.io/2019/03/21/现代密码学——对称加密和非对称加密/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 学习网络安全协议的时候用到了很多现代密码学的知识，也重新去学习了现代密码学的应用。想要有体系的整理在这里。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.264Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="密码学小整理">
+<meta name="twitter:description" content="写在前面 学习网络安全协议的时候用到了很多现代密码学的知识，也重新去学习了现代密码学的应用。想要有体系的整理在这里。">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>密码学小整理 | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-现代密码学——对称加密和非对称加密" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/03/21/现代密码学——对称加密和非对称加密/" class="article-date">
+      <time datetime="2019-03-21T02:29:41.000Z" itemprop="datePublished">2019-03-21</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      密码学小整理
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crypto/">crypto</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>学习网络安全协议的时候用到了很多现代密码学的知识，也重新去学习了现代密码学的应用。想要有体系的整理在这里。</p>
+</blockquote>
+<a id="more"></a> 
+<h2><span id="基本介绍">基本介绍</span></h2><h3><span id="加密算法">加密算法</span></h3><p>现代密码学主要分为对称密码和非对称密码两种。对称密码中主要有分组加密(AES、DES)、和流密码(RC4、LFSR). 非对称密码体制主要有RSA和Elgamal. 对称密码中，通信双方共享同一个秘钥，加密解密都使用这个秘密的key. 而非对称密码体制下，通信双方将使用不同的秘钥，公钥加密的内容需要私钥可以解密。私钥加密的内容，需要公钥解密。非对称密码的安全性都是基于数学上的单向函数保证的，比如RSA基于大数分解的问题，Elgamal基于基于DLP离散对数问题。</p>
+<h3><span id="对称密码">对称密码</span></h3><p>用到对称加密的时候相对来说比较少需要管对称加密的内部结构，比如S盒子、置换之类的。把对称加密看成一个黑箱，以AES举例，这个黑箱就是坚不可摧的，从算法上来考虑是没有漏洞的。但是分组加密中有很多不同的模式，其中ECB、CFB模式下是可以做文章的，以及数据长度没有刚好填满一组时的padding也有经典的padding oracle问题，这些可以之后写相关的blog总结。<strong>然而在实际通信里，如果有一个秘密信道可以保证双方共享了一个秘钥，那么更加倾向使用对称加密的方法，因为对称加密比非对称加密效率高很多</strong>。量子通信中也是希望实现秘钥分发过程中无法被破解，那么也就是保证了一个秘密信道，然后使用对称密码快速的加密传输消息。理论上最为安全的是使用一次一秘，明文多长秘钥多长，那么绝对安全。但是实际上量子信道的带宽是远小于传统信道的，所以一般来说是通过分发一个长度比较小的秘钥然后派生出更多的秘钥的方案来解决这个问题。秘钥派生感觉也很讲究，有很多不同的方案，我的理解是就相当于是使用初始秘钥作为种子，然后是RNG生成更多的秘钥。如果种子长度足够长，而且RNG算法够好的话，派生出来的秘钥也就是安全的了。</p>
+<h3><span id="非对称密码">非对称密码</span></h3><p>相比于对称加密需要双方共享同一个秘密的秘钥，非对称加密使用就很灵活。一对秘钥来进行加解密让非对称加密可以使用的情景就丰富很多。一般而言，私钥没有备份，仅保留在所有者的本机上。这个私钥对应的公钥可以随便分发。（其实还需要注册证书之后再说）因为公钥很多人都有，如果通信双方的对象身份已经确认，那么使用公钥加密发送信息，这个密文就只有私钥持有者可以解密信息，保证消息的保密性。反过来，如果一短消息用私钥加密，只有公钥可以解密，那么私钥加密的消息可以保证是本人的行为，于是私钥加密一般也就成为签名，这也就是数字签名。要保证消息来源的可靠性，我们要确认这个消息是Alice发的，那么这个消息上附带有Alice的签名即可。这也是消息确认码（Message Authentication Code)的一种实现方式。</p>
+<h3><span id="更多的考虑">更多的考虑</span></h3><p>在实际情况中，没有外加约束条件时，双方通信一般是通过非对称秘钥来传送会话秘钥（会话秘钥Session Key一般就是对称加密的秘钥），然后双方使用对称秘钥来实现通信。这样做的理由是对称加密的开销比非对称加密小得多。然而细想就会发现，使用非对称加密方法来实现通信实际上还有很多没有考虑的因素：</p>
+<ol>
+<li>对方是我要发信息的人吗？这个公钥是对方的吗？</li>
+<li>我接收到的消息有没有被人破坏？</li>
+<li>我接收到的消息是实时的吗？有没有可能是有人重放消息？</li>
+</ol>
+<p>我的理解是，只考虑密码学算法只是保证了<strong>保密性</strong>，灵活的使用密码学算法才能保证：<strong>完整性</strong>，<strong>实体真实</strong>，<strong>不可否认性</strong>。所谓完整性，就是保证消息没有被篡改。Alice发过来的下午3点见没有变成下午4点见。实体真实性是保证我这个消息是给Alice发过去的，不是发给了某个攻击者。不可否认性是保证消息不可抵赖，比如Alice发给银行的消息里有获得了50元，她不能重放这个消息无限制刷钱。我的理解是，一个完备的通信过程需要依次保证：实体真实、保密完整、不可抵赖。为了确保这些条件满足，引出以下概念。其实都是加密算法的应用：Digital Envelope、Public Key Infrastructure（想到在写，先存稿）</p>
+<h3><span id="digital-envelope">Digital Envelope</span></h3><p>由于非对称密码的运算复杂、加/解密速度慢，因此信息的加密采用对称密码算法，其会话密钥的分发采用非对称密码算法，即采用收方的公钥对会话密钥进行加密。这个其实就是使用数字信封发送会话秘钥（待补充）</p>
+<h2><span id="public-key-infrastructure">Public Key Infrastructure</span></h2><p>（待补充）</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-03-21, 10:29:41</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/03/21/现代密码学——对称加密和非对称加密/" title="密码学小整理">https://hustcw.github.io/2019/03/21/现代密码学——对称加密和非对称加密/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/03/21/现代密码学——对称加密和非对称加密/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/03/22/underfitting-overfitting/">
+                    underfitting &amp; overfitting
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/20/编译glibc遇到的问题/">
+                    编译glibc遇到的问题
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">基本介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.1.</span> <span class="toc-text">加密算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.2.</span> <span class="toc-text">对称密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.3.</span> <span class="toc-text">非对称密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.4.</span> <span class="toc-text">更多的考虑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.5.</span> <span class="toc-text">Digital Envelope</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">Public Key Infrastructure</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"密码学小整理　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+<! -- 添加捐赠图标 -->
+<div class ="post-donate">
+    <div id="donate_board" class="donate_bar center">
+        <a id="btn_donate" class="btn_donate" href="javascript:;" title="打赏"></a>
+        <span class="donate_txt">
+           ↑<br>
+           欣赏此文？求鼓励，求支持！
+        </span>
+        <br>
+      </div>  
+    <div id="donate_guide" class="donate_bar center hidden" >
+        <!-- 方式一： 
+            ![](/img/Alipay.jpg)
+            ![](/img/WeChatpay.jpg)
+        -->
+        <!-- 方式二；
+            step1：在_config.yml中添加配置
+                Alipay: /img/Alipay.jpg
+                WeChatpay: /img/WeChatpay.jpg
+            step2：此处两张图片的路径分别设置为如下
+                <img src=""
+                <img src=""
+        -->
+        <!-- 支付宝打赏图案 -->
+        <img src="/assets/img/alipay.jpg" alt="支付宝打赏">
+        <!-- 微信打赏图案 -->
+        <img src="/assets/img/wechat.png" alt="微信打赏">
+    </div>
+    <script type="text/javascript">
+        document.getElementById('btn_donate').onclick = function(){
+            $('#donate_board').addClass('hidden');
+            $('#donate_guide').removeClass('hidden');
+        }
+    </script>
+</div>
+<! -- 添加捐赠图标 -->
+
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/03/22/underfitting-overfitting/" title="上一篇: underfitting &amp; overfitting">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/20/编译glibc遇到的问题/" title="下一篇: 编译glibc遇到的问题">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

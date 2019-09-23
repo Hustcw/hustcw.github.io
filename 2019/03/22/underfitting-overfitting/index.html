@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 对过拟合和欠拟合的一些理解">
+<meta name="keywords" content="machine learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="underfitting &amp; overfitting">
+<meta property="og:url" content="https://hustcw.github.io/2019/03/22/underfitting-overfitting/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 对过拟合和欠拟合的一些理解">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/fitting/regularization.png">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/fitting/variance.png">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/fitting/fitting.png">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.263Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="underfitting &amp; overfitting">
+<meta name="twitter:description" content="写在前面 对过拟合和欠拟合的一些理解">
+<meta name="twitter:image" content="https://hustcw.github.io/assets/img/fitting/regularization.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>underfitting &amp; overfitting | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-underfitting-overfitting" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/03/22/underfitting-overfitting/" class="article-date">
+      <time datetime="2019-03-22T07:23:27.000Z" itemprop="datePublished">2019-03-22</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      underfitting &amp; overfitting
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/machine-learning/">machine learning</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>对过拟合和欠拟合的一些理解</p>
+</blockquote>
+<a id="more"></a>
+<h2><span id="loss-function-adjustment">loss function adjustment</span></h2><p>梯度下降目的就是把loss function最小化，但是我们怎么知道给定好的loss function，平方和为什么是一个恰当的衡量标准？假设我们有一个衡量拟合结果有多好的fit function，那么其实最大化fit function能达到和最小化loss function一样的效果。不这么做的原因是，fit funcion并不会因为输入的微笑改变而改变，或者说不是平滑的。因此不好微分。。从而没法梯度下降。但是平方和很多时候也并不能很好的衡量loss的真实情况，因为可能让loss fuction值小的条件是让拟合出来的结果变得很陡峭。我们现实生活中，连续的、平滑的情况还是占绝大多数。因此对loss function做一些调整很有必要，可能就平方和函数而言loss值更大，但是函数更加平滑，那这种结果更加可取。因此在loss funcion后加上一个调整项：$loss =\sum_{n} \left ( y^{n} - f^{n}(x) \right )^{2}+ \sum_{n} \omega^{2}$. 这个方法可以用在很多场景，被称为regularization</p>
+<p><img src="/assets/img/fitting/regularization.png" alt="regularization"></p>
+<h2><span id="variance-and-bias">variance and bias</span></h2><p>方差和偏差的理解其实没什么太大问题，主要是应用在讨论训练模型和理想模型的偏离的时候，需要结合在一起考虑需要理解清楚。对于一个实际的问题，在选定model和给定数据的情况下，我们可以训练出来的最佳fucntion设为$f1$.实际问题的真实function设为$f2$.想象一下，如果我们可以重复拿到数据选定同一个model训练10000次，那么每一次都可以训练出来一个$f1$.可以假设第n次训练出来的叫做$f_{1n}$.那么这n次训练出来的f的期望可以写成${*}_f$.可以想象，如果数据量很大，那么10000次下来，平均期望已经是选定model中针对实际问题最好的function了，但是这个function必然也会和实际的$f2$有一定的差距。这个差距我们就称为<strong>bias</strong>。这10000个sample的variance的大小取决于模型的复杂度和数据量。如果模型很简单，自然variance也会比较小。每次的数据量比较大，variance也会比较大。回到最初的问题，我选取好一个model，然后给定了数据，这时的和理想中最佳function相比的error来自于哪里呢？很简单，一个是来自于bias，一个是来自于variance。如果把理想的function看做射击时候的靶心，那么bias代表的就是瞄准的点和靶心的距离。如果variance大，那么瞄的准也不一定打得准。如果variance小，瞄准哪里基本上就打在哪里。因此给定一个复杂的model，想要让variance小，就让数据量大。这时候需要祭出李宏毅老师的图<br><img src="/assets/img/fitting/variance.png" alt="variance and bias"></p>
+<p><img src="/assets/img/fitting/fitting.png" alt="fitting"></p>
+<h2><span id="summary">summary</span></h2><p>之所以写这个是因为之前在西瓜书上看到overfitting的本质是学习过度了，意思是把训练集的特征学的过多，以至于真实情况中没有满足训练集的特征但是仍然属于result中的结果给排除在外了。举个例子是说：学习器认为有叶子，绿色的才是树。这是因为训练集中没有光秃秃的树，导致看到了光秃秃的树，学习器就判断失误了。underfitting是说，学习器认为绿色的就是树，这是学习不足导致的，连有没有叶子这个特征都没有学会识别，可以加强训练。真实情况中呢，更容易遇到的是overfitting，因为大部分网络的学习能力都是很强的（只要model选的问题不太大）。这里的结论却是：与理想function相比，bias带来的error大，则是underfitting，variance带来的error大则是overfitting。怎么理解这句话呢：</p>
+<ul>
+<li>bias太大证明模型太简单了，学习能力不足，学习不足的原因是model选的就有问题，数据量再怎么大也没法解决bias大带来的error。因此需要improve自己的model</li>
+<li>variance太大证明数据量太小了，即使model选的很好，学习能力也很强，但是学到的训练集的特征不能代表整体的特征，也就是overfitting，需要enlarge dataset.</li>
+</ul>
+<h2><span id="reference">Reference</span></h2><ol>
+<li><a href="http://speech.ee.ntu.edu.tw/~tlkagk/courses/ML_2016/Lecture/Bias%20and%20Variance%20%28v2%29.pdf" target="_blank" rel="noopener">where does the error come from</a></li>
+<li>[周志华] [机器学习]</li>
+</ol>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/03/22/underfitting-overfitting/">underfitting &amp; overfitting</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-03-22, 15:23:27</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/03/22/underfitting-overfitting/" title="underfitting &amp; overfitting">https://hustcw.github.io/2019/03/22/underfitting-overfitting/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/03/22/underfitting-overfitting/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/03/23/ctf中常用模块之binascii/">
+                    ctf中常用模块之binascii
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/21/现代密码学——对称加密和非对称加密/">
+                    密码学小整理
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">loss function adjustment</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">variance and bias</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text">Reference</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"underfitting & overfitting　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/03/23/ctf中常用模块之binascii/" title="上一篇: ctf中常用模块之binascii">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/21/现代密码学——对称加密和非对称加密/" title="下一篇: 密码学小整理">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

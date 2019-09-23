@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="author" content="hustcw">
+
+
+
+<meta name="description" content="写在前面 IDA反编译出来的代码时长带有一些自己定义的宏，转载一篇记录在这有需要就查一下。原文链接在这 ida反编译代码类型转换参考">
+<meta name="keywords" content="ida">
+<meta property="og:type" content="article">
+<meta property="og:title" content="转载:IDA代码类型转换">
+<meta property="og:url" content="https://hustcw.github.io/2019/04/05/转载-IDA代码类型转换/index.html">
+<meta property="og:site_name" content="Hustcw">
+<meta property="og:description" content="写在前面 IDA反编译出来的代码时长带有一些自己定义的宏，转载一篇记录在这有需要就查一下。原文链接在这 ida反编译代码类型转换参考">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-09-23T18:38:52.265Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="转载:IDA代码类型转换">
+<meta name="twitter:description" content="写在前面 IDA反编译出来的代码时长带有一些自己定义的宏，转载一篇记录在这有需要就查一下。原文链接在这 ida反编译代码类型转换参考">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Hustcw" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/favico.png">
+
+
+
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>转载:IDA代码类型转换 | Hustcw</title>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head></html>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">hustcw</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">hustcw</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/assets/img/MyAvatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">hustcw</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/Hustcw" title="GitHub"></a>
+                            
+                                <a class="fa Email" target="_blank" href="mailto:hustcw1998@gmail.com" title="Email"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-转载-IDA代码类型转换" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2019/04/05/转载-IDA代码类型转换/" class="article-date">
+      <time datetime="2019-04-05T11:31:32.000Z" itemprop="datePublished">2019-04-05</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      转载:IDA代码类型转换
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ida/">ida</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2><span id="写在前面">写在前面</span></h2><blockquote>
+<p>IDA反编译出来的代码时长带有一些自己定义的宏，转载一篇记录在这有需要就查一下。原文链接在这 <a href="https://www.cnblogs.com/goodhacker/p/7692443.html" target="_blank" rel="noopener">ida反编译代码类型转换参考</a></p>
+</blockquote>
+<a id="more"></a>
+<pre><span style="color: #008080;">  1</span> <span style="color: #008000;">/*</span>
+<span style="color: #008080;">  2</span> 
+<span style="color: #008080;">  3</span> <span style="color: #008000;">   This file contains definitions used by the Hex-Rays decompiler output.
+</span><span style="color: #008080;">  4</span> <span style="color: #008000;">   It has type definitions and convenience macros to make the
+</span><span style="color: #008080;">  5</span> <span style="color: #008000;">   output more readable.
+</span><span style="color: #008080;">  6</span> 
+<span style="color: #008080;">  7</span> <span style="color: #008000;">   Copyright (c) 2007-2011 Hex-Rays
+</span><span style="color: #008080;">  8</span> 
+<span style="color: #008080;">  9</span> <span style="color: #008000;">*/</span>
+<span style="color: #008080;"> 10</span> 
+<span style="color: #008080;"> 11</span> <span style="color: #0000ff;">#if</span> defined(__GNUC__)
+<span style="color: #008080;"> 12</span>   typedef          <span style="color: #0000ff;">long</span> <span style="color: #0000ff;">long</span><span style="color: #000000;"> ll;
+</span><span style="color: #008080;"> 13</span>   typedef unsigned <span style="color: #0000ff;">long</span> <span style="color: #0000ff;">long</span><span style="color: #000000;"> ull;
+</span><span style="color: #008080;"> 14</span>   <span style="color: #0000ff;">#define</span> __int64 long long
+<span style="color: #008080;"> 15</span>   <span style="color: #0000ff;">#define</span> __int32 int
+<span style="color: #008080;"> 16</span>   <span style="color: #0000ff;">#define</span> __int16 short
+<span style="color: #008080;"> 17</span>   <span style="color: #0000ff;">#define</span> __int8  char
+<span style="color: #008080;"> 18</span>   <span style="color: #0000ff;">#define</span> MAKELL(num) num ## LL
+<span style="color: #008080;"> 19</span>   <span style="color: #0000ff;">#define</span> FMT_64 "ll"
+<span style="color: #008080;"> 20</span> <span style="color: #0000ff;">#elif</span> defined(_MSC_VER)
+<span style="color: #008080;"> 21</span> <span style="color: #000000;">  typedef          __int64 ll;
+</span><span style="color: #008080;"> 22</span> <span style="color: #000000;">  typedef unsigned __int64 ull;
+</span><span style="color: #008080;"> 23</span>   <span style="color: #0000ff;">#define</span> MAKELL(num) num ## i64
+<span style="color: #008080;"> 24</span>   <span style="color: #0000ff;">#define</span> FMT_64 "I64"
+<span style="color: #008080;"> 25</span> <span style="color: #0000ff;">#elif</span> defined (__BORLANDC__)
+<span style="color: #008080;"> 26</span> <span style="color: #000000;">  typedef          __int64 ll;
+</span><span style="color: #008080;"> 27</span> <span style="color: #000000;">  typedef unsigned __int64 ull;
+</span><span style="color: #008080;"> 28</span>   <span style="color: #0000ff;">#define</span> MAKELL(num) num ## i64
+<span style="color: #008080;"> 29</span>   <span style="color: #0000ff;">#define</span> FMT_64 "L"
+<span style="color: #008080;"> 30</span> <span style="color: #0000ff;">#else</span>
+<span style="color: #008080;"> 31</span>   <span style="color: #0000ff;">#error</span> "unknown compiler"
+<span style="color: #008080;"> 32</span> <span style="color: #0000ff;">#endif</span>
+<span style="color: #008080;"> 33</span> typedef unsigned <span style="color: #0000ff;">int</span> <span style="color: #0000ff;">uint</span><span style="color: #000000;">;
+</span><span style="color: #008080;"> 34</span> typedef unsigned <span style="color: #0000ff;">char</span><span style="color: #000000;"> uchar;
+</span><span style="color: #008080;"> 35</span> typedef unsigned <span style="color: #0000ff;">short</span> <span style="color: #0000ff;">ushort</span><span style="color: #000000;">;
+</span><span style="color: #008080;"> 36</span> typedef unsigned <span style="color: #0000ff;">long</span> <span style="color: #0000ff;">ulong</span><span style="color: #000000;">;
+</span><span style="color: #008080;"> 37</span> 
+<span style="color: #008080;"> 38</span> typedef          <span style="color: #0000ff;">char</span><span style="color: #000000;">   int8;
+</span><span style="color: #008080;"> 39</span> typedef   signed <span style="color: #0000ff;">char</span><span style="color: #000000;">   sint8;
+</span><span style="color: #008080;"> 40</span> typedef unsigned <span style="color: #0000ff;">char</span><span style="color: #000000;">   uint8;
+</span><span style="color: #008080;"> 41</span> typedef          <span style="color: #0000ff;">short</span><span style="color: #000000;">  int16;
+</span><span style="color: #008080;"> 42</span> typedef   signed <span style="color: #0000ff;">short</span><span style="color: #000000;">  sint16;
+</span><span style="color: #008080;"> 43</span> typedef unsigned <span style="color: #0000ff;">short</span><span style="color: #000000;">  uint16;
+</span><span style="color: #008080;"> 44</span> typedef          <span style="color: #0000ff;">int</span><span style="color: #000000;">    int32;
+</span><span style="color: #008080;"> 45</span> typedef   signed <span style="color: #0000ff;">int</span><span style="color: #000000;">    sint32;
+</span><span style="color: #008080;"> 46</span> typedef unsigned <span style="color: #0000ff;">int</span><span style="color: #000000;">    uint32;
+</span><span style="color: #008080;"> 47</span> <span style="color: #000000;">typedef ll              int64;
+</span><span style="color: #008080;"> 48</span> <span style="color: #000000;">typedef ll              sint64;
+</span><span style="color: #008080;"> 49</span> <span style="color: #000000;">typedef ull             uint64;
+</span><span style="color: #008080;"> 50</span> 
+<span style="color: #008080;"> 51</span> <span style="color: #008000;">//</span><span style="color: #008000;"> Partially defined types:</span>
+<span style="color: #008080;"> 52</span> <span style="color: #0000ff;">#define</span> _BYTE  uint8
+<span style="color: #008080;"> 53</span> <span style="color: #0000ff;">#define</span> _WORD  uint16
+<span style="color: #008080;"> 54</span> <span style="color: #0000ff;">#define</span> _DWORD uint32
+<span style="color: #008080;"> 55</span> <span style="color: #0000ff;">#define</span> _QWORD uint64
+<span style="color: #008080;"> 56</span> <span style="color: #0000ff;">#if</span> !defined(_MSC_VER)
+<span style="color: #008080;"> 57</span> <span style="color: #0000ff;">#define</span> _LONGLONG __int128
+<span style="color: #008080;"> 58</span> <span style="color: #0000ff;">#endif</span>
+<span style="color: #008080;"> 59</span> 
+<span style="color: #008080;"> 60</span> <span style="color: #000000;">#ifndef _WINDOWS_
+</span><span style="color: #008080;"> 61</span> <span style="color: #000000;">typedef int8 BYTE;
+</span><span style="color: #008080;"> 62</span> <span style="color: #000000;">typedef int16 WORD;
+</span><span style="color: #008080;"> 63</span> <span style="color: #000000;">typedef int32 DWORD;
+</span><span style="color: #008080;"> 64</span> <span style="color: #000000;">typedef int32 LONG;
+</span><span style="color: #008080;"> 65</span> <span style="color: #0000ff;">#endif</span>
+<span style="color: #008080;"> 66</span> <span style="color: #000000;">typedef int64 QWORD;
+</span><span style="color: #008080;"> 67</span> <span style="color: #000000;">#ifndef __cplusplus
+</span><span style="color: #008080;"> 68</span> typedef <span style="color: #0000ff;">int</span> <span style="color: #0000ff;">bool</span>;       <span style="color: #008000;">//</span><span style="color: #008000;"> we want to use bool in our C programs</span>
+<span style="color: #008080;"> 69</span> <span style="color: #0000ff;">#endif</span>
+<span style="color: #008080;"> 70</span> 
+<span style="color: #008080;"> 71</span> <span style="color: #008000;">//</span><span style="color: #008000;"> Some convenience macros to make partial accesses nicer
+</span><span style="color: #008080;"> 72</span> <span style="color: #008000;">//</span><span style="color: #008000;"> first unsigned macros:</span>
+<span style="color: #008080;"> 73</span> <span style="color: #0000ff;">#define</span> LOBYTE(x)   (*((_BYTE*)&amp;(x)))   <span style="color: #008000;">//</span><span style="color: #008000;"> low byte</span>
+<span style="color: #008080;"> 74</span> <span style="color: #0000ff;">#define</span> LOWORD(x)   (*((_WORD*)&amp;(x)))   <span style="color: #008000;">//</span><span style="color: #008000;"> low word</span>
+<span style="color: #008080;"> 75</span> <span style="color: #0000ff;">#define</span> LODWORD(x)  (*((_DWORD*)&amp;(x)))  <span style="color: #008000;">//</span><span style="color: #008000;"> low dword</span>
+<span style="color: #008080;"> 76</span> <span style="color: #0000ff;">#define</span> HIBYTE(x)   (*((_BYTE*)&amp;(x)+1))
+<span style="color: #008080;"> 77</span> <span style="color: #0000ff;">#define</span> HIWORD(x)   (*((_WORD*)&amp;(x)+1))
+<span style="color: #008080;"> 78</span> <span style="color: #0000ff;">#define</span> HIDWORD(x)  (*((_DWORD*)&amp;(x)+1))
+<span style="color: #008080;"> 79</span> <span style="color: #0000ff;">#define</span> BYTEn(x, n)   (*((_BYTE*)&amp;(x)+n))
+<span style="color: #008080;"> 80</span> <span style="color: #0000ff;">#define</span> WORDn(x, n)   (*((_WORD*)&amp;(x)+n))
+<span style="color: #008080;"> 81</span> <span style="color: #0000ff;">#define</span> BYTE1(x)   BYTEn(x,  1)         <span style="color: #008000;">//</span><span style="color: #008000;"> byte 1 (counting from 0)</span>
+<span style="color: #008080;"> 82</span> <span style="color: #0000ff;">#define</span> BYTE2(x)   BYTEn(x,  2)
+<span style="color: #008080;"> 83</span> <span style="color: #0000ff;">#define</span> BYTE3(x)   BYTEn(x,  3)
+<span style="color: #008080;"> 84</span> <span style="color: #0000ff;">#define</span> BYTE4(x)   BYTEn(x,  4)
+<span style="color: #008080;"> 85</span> <span style="color: #0000ff;">#define</span> BYTE5(x)   BYTEn(x,  5)
+<span style="color: #008080;"> 86</span> <span style="color: #0000ff;">#define</span> BYTE6(x)   BYTEn(x,  6)
+<span style="color: #008080;"> 87</span> <span style="color: #0000ff;">#define</span> BYTE7(x)   BYTEn(x,  7)
+<span style="color: #008080;"> 88</span> <span style="color: #0000ff;">#define</span> BYTE8(x)   BYTEn(x,  8)
+<span style="color: #008080;"> 89</span> <span style="color: #0000ff;">#define</span> BYTE9(x)   BYTEn(x,  9)
+<span style="color: #008080;"> 90</span> <span style="color: #0000ff;">#define</span> BYTE10(x)  BYTEn(x, 10)
+<span style="color: #008080;"> 91</span> <span style="color: #0000ff;">#define</span> BYTE11(x)  BYTEn(x, 11)
+<span style="color: #008080;"> 92</span> <span style="color: #0000ff;">#define</span> BYTE12(x)  BYTEn(x, 12)
+<span style="color: #008080;"> 93</span> <span style="color: #0000ff;">#define</span> BYTE13(x)  BYTEn(x, 13)
+<span style="color: #008080;"> 94</span> <span style="color: #0000ff;">#define</span> BYTE14(x)  BYTEn(x, 14)
+<span style="color: #008080;"> 95</span> <span style="color: #0000ff;">#define</span> BYTE15(x)  BYTEn(x, 15)
+<span style="color: #008080;"> 96</span> <span style="color: #0000ff;">#define</span> WORD1(x)   WORDn(x,  1)
+<span style="color: #008080;"> 97</span> <span style="color: #0000ff;">#define</span> WORD2(x)   WORDn(x,  2)         <span style="color: #008000;">//</span><span style="color: #008000;"> third word of the object, unsigned</span>
+<span style="color: #008080;"> 98</span> <span style="color: #0000ff;">#define</span> WORD3(x)   WORDn(x,  3)
+<span style="color: #008080;"> 99</span> <span style="color: #0000ff;">#define</span> WORD4(x)   WORDn(x,  4)
+<span style="color: #008080;">100</span> <span style="color: #0000ff;">#define</span> WORD5(x)   WORDn(x,  5)
+<span style="color: #008080;">101</span> <span style="color: #0000ff;">#define</span> WORD6(x)   WORDn(x,  6)
+<span style="color: #008080;">102</span> <span style="color: #0000ff;">#define</span> WORD7(x)   WORDn(x,  7)
+<span style="color: #008080;">103</span> 
+<span style="color: #008080;">104</span> <span style="color: #008000;">//</span><span style="color: #008000;"> now signed macros (the same but with sign extension)</span>
+<span style="color: #008080;">105</span> <span style="color: #0000ff;">#define</span> SLOBYTE(x)   (*((int8*)&amp;(x)))
+<span style="color: #008080;">106</span> <span style="color: #0000ff;">#define</span> SLOWORD(x)   (*((int16*)&amp;(x)))
+<span style="color: #008080;">107</span> <span style="color: #0000ff;">#define</span> SLODWORD(x)  (*((int32*)&amp;(x)))
+<span style="color: #008080;">108</span> <span style="color: #0000ff;">#define</span> SHIBYTE(x)   (*((int8*)&amp;(x)+1))
+<span style="color: #008080;">109</span> <span style="color: #0000ff;">#define</span> SHIWORD(x)   (*((int16*)&amp;(x)+1))
+<span style="color: #008080;">110</span> <span style="color: #0000ff;">#define</span> SHIDWORD(x)  (*((int32*)&amp;(x)+1))
+<span style="color: #008080;">111</span> <span style="color: #0000ff;">#define</span> SBYTEn(x, n)   (*((int8*)&amp;(x)+n))
+<span style="color: #008080;">112</span> <span style="color: #0000ff;">#define</span> SWORDn(x, n)   (*((int16*)&amp;(x)+n))
+<span style="color: #008080;">113</span> <span style="color: #0000ff;">#define</span> SBYTE1(x)   SBYTEn(x,  1)
+<span style="color: #008080;">114</span> <span style="color: #0000ff;">#define</span> SBYTE2(x)   SBYTEn(x,  2)
+<span style="color: #008080;">115</span> <span style="color: #0000ff;">#define</span> SBYTE3(x)   SBYTEn(x,  3)
+<span style="color: #008080;">116</span> <span style="color: #0000ff;">#define</span> SBYTE4(x)   SBYTEn(x,  4)
+<span style="color: #008080;">117</span> <span style="color: #0000ff;">#define</span> SBYTE5(x)   SBYTEn(x,  5)
+<span style="color: #008080;">118</span> <span style="color: #0000ff;">#define</span> SBYTE6(x)   SBYTEn(x,  6)
+<span style="color: #008080;">119</span> <span style="color: #0000ff;">#define</span> SBYTE7(x)   SBYTEn(x,  7)
+<span style="color: #008080;">120</span> <span style="color: #0000ff;">#define</span> SBYTE8(x)   SBYTEn(x,  8)
+<span style="color: #008080;">121</span> <span style="color: #0000ff;">#define</span> SBYTE9(x)   SBYTEn(x,  9)
+<span style="color: #008080;">122</span> <span style="color: #0000ff;">#define</span> SBYTE10(x)  SBYTEn(x, 10)
+<span style="color: #008080;">123</span> <span style="color: #0000ff;">#define</span> SBYTE11(x)  SBYTEn(x, 11)
+<span style="color: #008080;">124</span> <span style="color: #0000ff;">#define</span> SBYTE12(x)  SBYTEn(x, 12)
+<span style="color: #008080;">125</span> <span style="color: #0000ff;">#define</span> SBYTE13(x)  SBYTEn(x, 13)
+<span style="color: #008080;">126</span> <span style="color: #0000ff;">#define</span> SBYTE14(x)  SBYTEn(x, 14)
+<span style="color: #008080;">127</span> <span style="color: #0000ff;">#define</span> SBYTE15(x)  SBYTEn(x, 15)
+<span style="color: #008080;">128</span> <span style="color: #0000ff;">#define</span> SWORD1(x)   SWORDn(x,  1)
+<span style="color: #008080;">129</span> <span style="color: #0000ff;">#define</span> SWORD2(x)   SWORDn(x,  2)
+<span style="color: #008080;">130</span> <span style="color: #0000ff;">#define</span> SWORD3(x)   SWORDn(x,  3)
+<span style="color: #008080;">131</span> <span style="color: #0000ff;">#define</span> SWORD4(x)   SWORDn(x,  4)
+<span style="color: #008080;">132</span> <span style="color: #0000ff;">#define</span> SWORD5(x)   SWORDn(x,  5)
+<span style="color: #008080;">133</span> <span style="color: #0000ff;">#define</span> SWORD6(x)   SWORDn(x,  6)
+<span style="color: #008080;">134</span> <span style="color: #0000ff;">#define</span> SWORD7(x)   SWORDn(x,  7)
+<span style="color: #008080;">135</span> 
+<span style="color: #008080;">136</span> 
+<span style="color: #008080;">137</span> <span style="color: #008000;">//</span><span style="color: #008000;"> Helper functions to represent some assembly instructions.</span>
+<span style="color: #008080;">138</span> 
+<span style="color: #008080;">139</span> <span style="color: #000000;">#ifdef __cplusplus
+</span><span style="color: #008080;">140</span> 
+<span style="color: #008080;">141</span> <span style="color: #008000;">//</span><span style="color: #008000;"> Fill memory block with an integer value</span>
+<span style="color: #008080;">142</span> inline <span style="color: #0000ff;">void</span> memset32(<span style="color: #0000ff;">void</span> *ptr, uint32 value, <span style="color: #0000ff;">int</span><span style="color: #000000;"> count)
+</span><span style="color: #008080;">143</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">144</span>   uint32 *p = (uint32 *<span style="color: #000000;">)ptr;
+</span><span style="color: #008080;">145</span>   <span style="color: #0000ff;">for</span> ( <span style="color: #0000ff;">int</span> i=<span style="color: #800080;">0</span>; i &lt; count; i++<span style="color: #000000;"> )
+</span><span style="color: #008080;">146</span>     *p++ =<span style="color: #000000;"> value;
+</span><span style="color: #008080;">147</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">148</span> 
+<span style="color: #008080;">149</span> <span style="color: #008000;">//</span><span style="color: #008000;"> Generate a reference to pair of operands</span>
+<span style="color: #008080;">150</span> template&lt;<span style="color: #0000ff;">class</span> T&gt;  int16 __PAIR__( int8  high, T low) { <span style="color: #0000ff;">return</span> ((( int16)high) &lt;&lt; <span style="color: #0000ff;">sizeof</span>(high)*<span style="color: #800080;">8</span>) |<span style="color: #000000;"> uint8(low); }
+</span><span style="color: #008080;">151</span> template&lt;<span style="color: #0000ff;">class</span> T&gt;  int32 __PAIR__( int16 high, T low) { <span style="color: #0000ff;">return</span> ((( int32)high) &lt;&lt; <span style="color: #0000ff;">sizeof</span>(high)*<span style="color: #800080;">8</span>) |<span style="color: #000000;"> uint16(low); }
+</span><span style="color: #008080;">152</span> template&lt;<span style="color: #0000ff;">class</span> T&gt;  int64 __PAIR__( int32 high, T low) { <span style="color: #0000ff;">return</span> ((( int64)high) &lt;&lt; <span style="color: #0000ff;">sizeof</span>(high)*<span style="color: #800080;">8</span>) |<span style="color: #000000;"> uint32(low); }
+</span><span style="color: #008080;">153</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; uint16 __PAIR__(uint8  high, T low) { <span style="color: #0000ff;">return</span> (((uint16)high) &lt;&lt; <span style="color: #0000ff;">sizeof</span>(high)*<span style="color: #800080;">8</span>) |<span style="color: #000000;"> uint8(low); }
+</span><span style="color: #008080;">154</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; uint32 __PAIR__(uint16 high, T low) { <span style="color: #0000ff;">return</span> (((uint32)high) &lt;&lt; <span style="color: #0000ff;">sizeof</span>(high)*<span style="color: #800080;">8</span>) |<span style="color: #000000;"> uint16(low); }
+</span><span style="color: #008080;">155</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; uint64 __PAIR__(uint32 high, T low) { <span style="color: #0000ff;">return</span> (((uint64)high) &lt;&lt; <span style="color: #0000ff;">sizeof</span>(high)*<span style="color: #800080;">8</span>) |<span style="color: #000000;"> uint32(low); }
+</span><span style="color: #008080;">156</span> 
+<span style="color: #008080;">157</span> <span style="color: #008000;">//</span><span style="color: #008000;"> rotate left</span>
+<span style="color: #008080;">158</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; T __ROL__(T value, <span style="color: #0000ff;">uint</span><span style="color: #000000;"> count)
+</span><span style="color: #008080;">159</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">160</span>   <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">uint</span> nbits = <span style="color: #0000ff;">sizeof</span>(T) * <span style="color: #800080;">8</span><span style="color: #000000;">;
+</span><span style="color: #008080;">161</span>   count %=<span style="color: #000000;"> nbits;
+</span><span style="color: #008080;">162</span> 
+<span style="color: #008080;">163</span>   T high = value &gt;&gt; (nbits -<span style="color: #000000;"> count);
+</span><span style="color: #008080;">164</span>   value &lt;&lt;=<span style="color: #000000;"> count;
+</span><span style="color: #008080;">165</span>   value |=<span style="color: #000000;"> high;
+</span><span style="color: #008080;">166</span>   <span style="color: #0000ff;">return</span><span style="color: #000000;"> value;
+</span><span style="color: #008080;">167</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">168</span> 
+<span style="color: #008080;">169</span> <span style="color: #008000;">//</span><span style="color: #008000;"> rotate right</span>
+<span style="color: #008080;">170</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; T __ROR__(T value, <span style="color: #0000ff;">uint</span><span style="color: #000000;"> count)
+</span><span style="color: #008080;">171</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">172</span>   <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">uint</span> nbits = <span style="color: #0000ff;">sizeof</span>(T) * <span style="color: #800080;">8</span><span style="color: #000000;">;
+</span><span style="color: #008080;">173</span>   count %=<span style="color: #000000;"> nbits;
+</span><span style="color: #008080;">174</span> 
+<span style="color: #008080;">175</span>   T low = value &lt;&lt; (nbits -<span style="color: #000000;"> count);
+</span><span style="color: #008080;">176</span>   value &gt;&gt;=<span style="color: #000000;"> count;
+</span><span style="color: #008080;">177</span>   value |=<span style="color: #000000;"> low;
+</span><span style="color: #008080;">178</span>   <span style="color: #0000ff;">return</span><span style="color: #000000;"> value;
+</span><span style="color: #008080;">179</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">180</span> 
+<span style="color: #008080;">181</span> <span style="color: #008000;">//</span><span style="color: #008000;"> carry flag of left shift</span>
+<span style="color: #008080;">182</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; int8 __MKCSHL__(T value, <span style="color: #0000ff;">uint</span><span style="color: #000000;"> count)
+</span><span style="color: #008080;">183</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">184</span>   <span style="color: #0000ff;">const</span> <span style="color: #0000ff;">uint</span> nbits = <span style="color: #0000ff;">sizeof</span>(T) * <span style="color: #800080;">8</span><span style="color: #000000;">;
+</span><span style="color: #008080;">185</span>   count %=<span style="color: #000000;"> nbits;
+</span><span style="color: #008080;">186</span> 
+<span style="color: #008080;">187</span>   <span style="color: #0000ff;">return</span> (value &gt;&gt; (nbits-count)) &amp; <span style="color: #800080;">1</span><span style="color: #000000;">;
+</span><span style="color: #008080;">188</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">189</span> 
+<span style="color: #008080;">190</span> <span style="color: #008000;">//</span><span style="color: #008000;"> carry flag of right shift</span>
+<span style="color: #008080;">191</span> template&lt;<span style="color: #0000ff;">class</span> T&gt; int8 __MKCSHR__(T value, <span style="color: #0000ff;">uint</span><span style="color: #000000;"> count)
+</span><span style="color: #008080;">192</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">193</span>   <span style="color: #0000ff;">return</span> (value &gt;&gt; (count-<span style="color: #800080;">1</span>)) &amp; <span style="color: #800080;">1</span><span style="color: #000000;">;
+</span><span style="color: #008080;">194</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">195</span> 
+<span style="color: #008080;">196</span> <span style="color: #008000;">//</span><span style="color: #008000;"> sign flag</span>
+<span style="color: #008080;">197</span> template&lt;<span style="color: #0000ff;">class</span> T&gt;<span style="color: #000000;"> int8 __SETS__(T x)
+</span><span style="color: #008080;">198</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">199</span>   <span style="color: #0000ff;">if</span> ( <span style="color: #0000ff;">sizeof</span>(T) == <span style="color: #800080;">1</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">200</span>     <span style="color: #0000ff;">return</span> int8(x) &lt; <span style="color: #800080;">0</span><span style="color: #000000;">;
+</span><span style="color: #008080;">201</span>   <span style="color: #0000ff;">if</span> ( <span style="color: #0000ff;">sizeof</span>(T) == <span style="color: #800080;">2</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">202</span>     <span style="color: #0000ff;">return</span> int16(x) &lt; <span style="color: #800080;">0</span><span style="color: #000000;">;
+</span><span style="color: #008080;">203</span>   <span style="color: #0000ff;">if</span> ( <span style="color: #0000ff;">sizeof</span>(T) == <span style="color: #800080;">4</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">204</span>     <span style="color: #0000ff;">return</span> int32(x) &lt; <span style="color: #800080;">0</span><span style="color: #000000;">;
+</span><span style="color: #008080;">205</span>   <span style="color: #0000ff;">return</span> int64(x) &lt; <span style="color: #800080;">0</span><span style="color: #000000;">;
+</span><span style="color: #008080;">206</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">207</span> 
+<span style="color: #008080;">208</span> <span style="color: #008000;">//</span><span style="color: #008000;"> overflow flag of subtraction (x-y)</span>
+<span style="color: #008080;">209</span> template&lt;<span style="color: #0000ff;">class</span> T, <span style="color: #0000ff;">class</span> U&gt;<span style="color: #000000;"> int8 __OFSUB__(T x, U y)
+</span><span style="color: #008080;">210</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">211</span>   <span style="color: #0000ff;">if</span> ( <span style="color: #0000ff;">sizeof</span>(T) &lt; <span style="color: #0000ff;">sizeof</span><span style="color: #000000;">(U) )
+</span><span style="color: #008080;">212</span> <span style="color: #000000;">  {
+</span><span style="color: #008080;">213</span>     U x2 =<span style="color: #000000;"> x;
+</span><span style="color: #008080;">214</span>     int8 sx =<span style="color: #000000;"> __SETS__(x2);
+</span><span style="color: #008080;">215</span>     <span style="color: #0000ff;">return</span> (sx ^ __SETS__(y)) &amp; (sx ^ __SETS__(x2-<span style="color: #000000;">y));
+</span><span style="color: #008080;">216</span> <span style="color: #000000;">  }
+</span><span style="color: #008080;">217</span>   <span style="color: #0000ff;">else</span>
+<span style="color: #008080;">218</span> <span style="color: #000000;">  {
+</span><span style="color: #008080;">219</span>     T y2 =<span style="color: #000000;"> y;
+</span><span style="color: #008080;">220</span>     int8 sx =<span style="color: #000000;"> __SETS__(x);
+</span><span style="color: #008080;">221</span>     <span style="color: #0000ff;">return</span> (sx ^ __SETS__(y2)) &amp; (sx ^ __SETS__(x-<span style="color: #000000;">y2));
+</span><span style="color: #008080;">222</span> <span style="color: #000000;">  }
+</span><span style="color: #008080;">223</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">224</span> 
+<span style="color: #008080;">225</span> <span style="color: #008000;">//</span><span style="color: #008000;"> overflow flag of addition (x+y)</span>
+<span style="color: #008080;">226</span> template&lt;<span style="color: #0000ff;">class</span> T, <span style="color: #0000ff;">class</span> U&gt;<span style="color: #000000;"> int8 __OFADD__(T x, U y)
+</span><span style="color: #008080;">227</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">228</span>   <span style="color: #0000ff;">if</span> ( <span style="color: #0000ff;">sizeof</span>(T) &lt; <span style="color: #0000ff;">sizeof</span><span style="color: #000000;">(U) )
+</span><span style="color: #008080;">229</span> <span style="color: #000000;">  {
+</span><span style="color: #008080;">230</span>     U x2 =<span style="color: #000000;"> x;
+</span><span style="color: #008080;">231</span>     int8 sx =<span style="color: #000000;"> __SETS__(x2);
+</span><span style="color: #008080;">232</span>     <span style="color: #0000ff;">return</span> ((<span style="color: #800080;">1</span> ^ sx) ^ __SETS__(y)) &amp; (sx ^ __SETS__(x2+<span style="color: #000000;">y));
+</span><span style="color: #008080;">233</span> <span style="color: #000000;">  }
+</span><span style="color: #008080;">234</span>   <span style="color: #0000ff;">else</span>
+<span style="color: #008080;">235</span> <span style="color: #000000;">  {
+</span><span style="color: #008080;">236</span>     T y2 =<span style="color: #000000;"> y;
+</span><span style="color: #008080;">237</span>     int8 sx =<span style="color: #000000;"> __SETS__(x);
+</span><span style="color: #008080;">238</span>     <span style="color: #0000ff;">return</span> ((<span style="color: #800080;">1</span> ^ sx) ^ __SETS__(y2)) &amp; (sx ^ __SETS__(x+<span style="color: #000000;">y2));
+</span><span style="color: #008080;">239</span> <span style="color: #000000;">  }
+</span><span style="color: #008080;">240</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">241</span> 
+<span style="color: #008080;">242</span> <span style="color: #008000;">//</span><span style="color: #008000;"> carry flag of subtraction (x-y)</span>
+<span style="color: #008080;">243</span> template&lt;<span style="color: #0000ff;">class</span> T, <span style="color: #0000ff;">class</span> U&gt;<span style="color: #000000;"> int8 __CFSUB__(T x, U y)
+</span><span style="color: #008080;">244</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">245</span>   <span style="color: #0000ff;">int</span> size = <span style="color: #0000ff;">sizeof</span>(T) &gt; <span style="color: #0000ff;">sizeof</span>(U) ? <span style="color: #0000ff;">sizeof</span>(T) : <span style="color: #0000ff;">sizeof</span><span style="color: #000000;">(U);
+</span><span style="color: #008080;">246</span>   <span style="color: #0000ff;">if</span> ( size == <span style="color: #800080;">1</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">247</span>     <span style="color: #0000ff;">return</span> uint8(x) &lt;<span style="color: #000000;"> uint8(y);
+</span><span style="color: #008080;">248</span>   <span style="color: #0000ff;">if</span> ( size == <span style="color: #800080;">2</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">249</span>     <span style="color: #0000ff;">return</span> uint16(x) &lt;<span style="color: #000000;"> uint16(y);
+</span><span style="color: #008080;">250</span>   <span style="color: #0000ff;">if</span> ( size == <span style="color: #800080;">4</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">251</span>     <span style="color: #0000ff;">return</span> uint32(x) &lt;<span style="color: #000000;"> uint32(y);
+</span><span style="color: #008080;">252</span>   <span style="color: #0000ff;">return</span> uint64(x) &lt;<span style="color: #000000;"> uint64(y);
+</span><span style="color: #008080;">253</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">254</span> 
+<span style="color: #008080;">255</span> <span style="color: #008000;">//</span><span style="color: #008000;"> carry flag of addition (x+y)</span>
+<span style="color: #008080;">256</span> template&lt;<span style="color: #0000ff;">class</span> T, <span style="color: #0000ff;">class</span> U&gt;<span style="color: #000000;"> int8 __CFADD__(T x, U y)
+</span><span style="color: #008080;">257</span> <span style="color: #000000;">{
+</span><span style="color: #008080;">258</span>   <span style="color: #0000ff;">int</span> size = <span style="color: #0000ff;">sizeof</span>(T) &gt; <span style="color: #0000ff;">sizeof</span>(U) ? <span style="color: #0000ff;">sizeof</span>(T) : <span style="color: #0000ff;">sizeof</span><span style="color: #000000;">(U);
+</span><span style="color: #008080;">259</span>   <span style="color: #0000ff;">if</span> ( size == <span style="color: #800080;">1</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">260</span>     <span style="color: #0000ff;">return</span> uint8(x) &gt; uint8(x+<span style="color: #000000;">y);
+</span><span style="color: #008080;">261</span>   <span style="color: #0000ff;">if</span> ( size == <span style="color: #800080;">2</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">262</span>     <span style="color: #0000ff;">return</span> uint16(x) &gt; uint16(x+<span style="color: #000000;">y);
+</span><span style="color: #008080;">263</span>   <span style="color: #0000ff;">if</span> ( size == <span style="color: #800080;">4</span><span style="color: #000000;"> )
+</span><span style="color: #008080;">264</span>     <span style="color: #0000ff;">return</span> uint32(x) &gt; uint32(x+<span style="color: #000000;">y);
+</span><span style="color: #008080;">265</span>   <span style="color: #0000ff;">return</span> uint64(x) &gt; uint64(x+<span style="color: #000000;">y);
+</span><span style="color: #008080;">266</span> <span style="color: #000000;">}
+</span><span style="color: #008080;">267</span> 
+<span style="color: #008080;">268</span> <span style="color: #0000ff;">#else</span>
+<span style="color: #008080;">269</span> <span style="color: #008000;">//</span><span style="color: #008000;"> The following definition is not quite correct because it always returns
+</span><span style="color: #008080;">270</span> <span style="color: #008000;">//</span><span style="color: #008000;"> uint64. The above C++ functions are good, though.</span>
+<span style="color: #008080;">271</span> <span style="color: #0000ff;">#define</span> __PAIR__(high, low) (((uint64)(high)&lt;&lt;sizeof(high)*8) | low)
+<span style="color: #008080;">272</span> <span style="color: #008000;">//</span><span style="color: #008000;"> For C, we just provide macros, they are not quite correct.</span>
+<span style="color: #008080;">273</span> <span style="color: #0000ff;">#define</span> __ROL__(x, y) __rotl__(x, y)      <span style="color: #008000;">//</span><span style="color: #008000;"> Rotate left</span>
+<span style="color: #008080;">274</span> <span style="color: #0000ff;">#define</span> __ROR__(x, y) __rotr__(x, y)      <span style="color: #008000;">//</span><span style="color: #008000;"> Rotate right</span>
+<span style="color: #008080;">275</span> <span style="color: #0000ff;">#define</span> __CFSHL__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate carry flag for (x&lt;&lt;y)</span>
+<span style="color: #008080;">276</span> <span style="color: #0000ff;">#define</span> __CFSHR__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate carry flag for (x&gt;&gt;y)</span>
+<span style="color: #008080;">277</span> <span style="color: #0000ff;">#define</span> __CFADD__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate carry flag for (x+y)</span>
+<span style="color: #008080;">278</span> <span style="color: #0000ff;">#define</span> __CFSUB__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate carry flag for (x-y)</span>
+<span style="color: #008080;">279</span> <span style="color: #0000ff;">#define</span> __OFADD__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate overflow flag for (x+y)</span>
+<span style="color: #008080;">280</span> <span style="color: #0000ff;">#define</span> __OFSUB__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate overflow flag for (x-y)</span>
+<span style="color: #008080;">281</span> <span style="color: #0000ff;">#endif</span>
+<span style="color: #008080;">282</span> 
+<span style="color: #008080;">283</span> <span style="color: #008000;">//</span><span style="color: #008000;"> No definition for rcl/rcr because the carry flag is unknown</span>
+<span style="color: #008080;">284</span> <span style="color: #0000ff;">#define</span> __RCL__(x, y)    invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Rotate left thru carry</span>
+<span style="color: #008080;">285</span> <span style="color: #0000ff;">#define</span> __RCR__(x, y)    invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Rotate right thru carry</span>
+<span style="color: #008080;">286</span> <span style="color: #0000ff;">#define</span> __MKCRCL__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate carry flag for a RCL</span>
+<span style="color: #008080;">287</span> <span style="color: #0000ff;">#define</span> __MKCRCR__(x, y) invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate carry flag for a RCR</span>
+<span style="color: #008080;">288</span> <span style="color: #0000ff;">#define</span> __SETP__(x, y)   invalid_operation <span style="color: #008000;">//</span><span style="color: #008000;"> Generate parity flag for (x-y)</span>
+<span style="color: #008080;">289</span> 
+<span style="color: #008080;">290</span> <span style="color: #008000;">//</span><span style="color: #008000;"> In the decompilation listing there are some objects declarared as _UNKNOWN
+</span><span style="color: #008080;">291</span> <span style="color: #008000;">//</span><span style="color: #008000;"> because we could not determine their types. Since the C compiler does not
+</span><span style="color: #008080;">292</span> <span style="color: #008000;">//</span><span style="color: #008000;"> accept void item declarations, we replace them by anything of our choice,
+</span><span style="color: #008080;">293</span> <span style="color: #008000;">//</span><span style="color: #008000;"> for example a char:</span>
+<span style="color: #008080;">294</span> 
+<span style="color: #008080;">295</span> <span style="color: #0000ff;">#define</span> _UNKNOWN char
+<span style="color: #008080;">296</span> 
+<span style="color: #008080;">297</span> <span style="color: #000000;">#ifdef _MSC_VER
+</span><span style="color: #008080;">298</span> <span style="color: #0000ff;">#define</span> snprintf _snprintf
+<span style="color: #008080;">299</span> <span style="color: #0000ff;">#define</span> vsnprintf _vsnprintf
+<span style="color: #008080;">300</span> <span style="color: #0000ff;">#endif</span></pre>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
+        <p><span>发布时间:</span>2019-04-05, 19:31:32</p>
+        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2019/04/05/转载-IDA代码类型转换/" title="转载:IDA代码类型转换">https://hustcw.github.io/2019/04/05/转载-IDA代码类型转换/</a>
+            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/04/05/转载-IDA代码类型转换/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2019/04/11/堆利用——布局内存任意地址写/">
+                    堆利用——布局内存任意地址写
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">
+                    VMware Fusion NAT无法连接网络
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"转载:IDA代码类型转换　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+<!-- 添加打赏功能 -->
+
+
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2019/04/11/堆利用——布局内存任意地址写/" title="上一篇: 堆利用——布局内存任意地址写">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2019/04/03/VMware-Fusion-NAT无法连接网络/" title="下一篇: VMware Fusion NAT无法连接网络">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+
+
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2018-2019 hustcw
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#414141", "#e5a859", "#f5dfc6", "#847e72", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 1;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
