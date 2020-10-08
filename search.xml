@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>AFL记录</title>
+      <link href="/2020/08/06/AFL%E8%AE%B0%E5%BD%95/"/>
+      <url>/2020/08/06/AFL%E8%AE%B0%E5%BD%95/</url>
+      
+        <content type="html"><![CDATA[<h2><span id="写在前面">写在前面</span></h2><blockquote><p>记录AFL的使用和代码阅读</p></blockquote><h2><span id="afl窗口">AFL窗口</span></h2><ul><li><p>Process timing: Fuzzer运行时长、以及距离最近发现的路径、崩溃和挂起经过了多长时间。</p></li><li><p>Overall results：Fuzzer当前状态的概述。</p></li><li><p>Cycle progress：我们输入队列的距离。</p></li><li><p>Map coverage：目标二进制文件中的插桩代码所观察到覆盖范围的细节。</p></li><li><p>Stage progress：Fuzzer现在正在执行的文件变异策略、执行次数和执行速度。</p></li><li><p>Findings in depth：有关我们找到的执行路径，异常和挂起数量的信息。</p></li><li><p>Fuzzing strategy yields：关于突变策略产生的最新行为和结果的详细信息。</p></li><li><p>Path geometry：有关Fuzzer找到的执行路径的信息。</p></li><li><p>CPU load：CPU利用率</p></li></ul><h2><span id="参考资料">参考资料</span></h2><ul><li><a href="https://www.freebuf.com/articles/system/191536.html" target="_blank" rel="noopener">AFL漏洞挖掘技术漫谈（一）：用AFL开始你的第一次Fuzzing</a></li></ul>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> fuzz </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>堆上的off-by-null</title>
       <link href="/2019/09/24/%E5%A0%86%E4%B8%8A%E7%9A%84off-by-null/"/>
       <url>/2019/09/24/%E5%A0%86%E4%B8%8A%E7%9A%84off-by-null/</url>
@@ -71,7 +90,7 @@
       <link href="/2019/05/29/%E8%8D%92%E5%BA%9F%E5%B7%B2%E4%B9%85%E7%9A%84pwn%E5%A4%8D%E4%B9%A0%E6%80%BB%E7%BB%93/"/>
       <url>/2019/05/29/%E8%8D%92%E5%BA%9F%E5%B7%B2%E4%B9%85%E7%9A%84pwn%E5%A4%8D%E4%B9%A0%E6%80%BB%E7%BB%93/</url>
       
-        <content type="html"><![CDATA[<h2><span id="写在前面">写在前面</span></h2><blockquote><p>天哪感觉有一个世纪没有写过blog的样子，曾经高产似母猪。 竟然一个多月没动笔了（雾。。） 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。（其实就是没长进hhh）做了一些别的事情，作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。</p></blockquote><a id="more"></a><h2><span id="奇妙的shellcode">奇妙的shellcode</span></h2><p>shellcode确实是一个奇妙的东西，不需要libc的情况下getshell的一个方法。绕过NX呢需要这两种条件，mprotect函数存在或者mmap存在，调用参数如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">mmap</span><span class="params">( <span class="keyword">void</span> *start , <span class="keyword">size_t</span> length , <span class="keyword">int</span> prot , <span class="keyword">int</span> flags , <span class="keyword">int</span> fd , <span class="keyword">off_t</span> offsize)</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">mprotect</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *start, <span class="keyword">size_t</span> len, <span class="keyword">int</span> prot)</span></span>;</span><br></pre></td></tr></table></figure></p><p>开始地址，长度不用说，prot–&gt;protect表示设置访问权限（粒度和linux的访问控制一样，完了被计算机安全污染了rwx是7）. 要注意的是地址需要和0x1000对齐. mmap多三个参数，其中flags选择MAP_ANONYMOUS加MAP_PRIVATE，其中：</p><ul><li>MAP_ANONYMOUS：建立匿名映像。此时会忽略参数fd，不涉及文件，而且映像区域无法和其他进程共享。</li><li>MAP_PRIVATE：对映像区域的写入操作会产生一个映像文件的复制，即私人的“写入时复制”（copy on write）对此区域作的任何修改都不会写回原来的文件内容。当共享的对象的虚拟存储区域为私有对象时，修改只会被本进程中改变。<br><img src="/assets/img/mmap-flags.jpg" alt="flags-paras"><br>好啦，32位和64位一样，都是rop挑一个地方改权限，然后写shellcode。32位的话因为栈传参导致需要pop_2,pop_3之类的gadgets，从csu那里找就行（好吧我是不是没记录csu，改天写一个，不如就写在下面？）</li></ul><h2><span id="好用的welpwn和ida2pwntools">好用的welpwn和ida2pwntools</span></h2><ul><li>先说ida2pwntools, 这玩意贼好用，<code>from pwnlib.utils.proc import wait_for_debugger</code>之后直接f12可以弹出来。不过我可能得开始熟悉pwndbg了，毕竟更加灵活。（heapviewer真的太好用了啊！ida用得好其实问题并不大。。个人感觉）</li><li>welpwn的话，我觉得理念很好，常用工具就应该写一块重复造轮子干嘛！one_gadget, rop, libc_search就应该放一起呀，顺便提一下还有调libc顺便学习堆。pwn就应该变成art！所以自己也在下意识的积累自己的template，可以搞一波开发，顺便看看别人咋写的</li></ul><h2><span id="changld">changld</span></h2><p>妈妈再也不用担心libc不兼容！（其实还是担心，毕竟可能没有ld。。解决方案的话，我觉得多准备几个版本的虚拟机，啊明天就准备！）</p><p>(好困呀，改天写怎么blind pwn 和 怎么 ret2csu. 晚安世界！)</p>]]></content>
+        <content type="html"><![CDATA[<h2><span id="写在前面">写在前面</span></h2><blockquote><p>天哪感觉有一个世纪没有写过blog的样子。 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。</p></blockquote><a id="more"></a><h2><span id="奇妙的shellcode">奇妙的shellcode</span></h2><p>shellcode确实是一个奇妙的东西，不需要libc的情况下getshell的一个方法。绕过NX呢需要这两种条件，mprotect函数存在或者mmap存在，调用参数如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">mmap</span><span class="params">( <span class="keyword">void</span> *start , <span class="keyword">size_t</span> length , <span class="keyword">int</span> prot , <span class="keyword">int</span> flags , <span class="keyword">int</span> fd , <span class="keyword">off_t</span> offsize)</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">mprotect</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *start, <span class="keyword">size_t</span> len, <span class="keyword">int</span> prot)</span></span>;</span><br></pre></td></tr></table></figure></p><p>开始地址，长度不用说，prot–&gt;protect表示设置访问权限（粒度和linux的访问控制一样，完了被计算机安全污染了rwx是7）. 要注意的是地址需要和0x1000对齐. mmap多三个参数，其中flags选择MAP_ANONYMOUS加MAP_PRIVATE，其中：</p><ul><li>MAP_ANONYMOUS：建立匿名映像。此时会忽略参数fd，不涉及文件，而且映像区域无法和其他进程共享。</li><li>MAP_PRIVATE：对映像区域的写入操作会产生一个映像文件的复制，即私人的“写入时复制”（copy on write）对此区域作的任何修改都不会写回原来的文件内容。当共享的对象的虚拟存储区域为私有对象时，修改只会被本进程中改变。<br><img src="/assets/img/mmap-flags.jpg" alt="flags-paras"><br>好啦，32位和64位一样，都是rop挑一个地方改权限，然后写shellcode。32位的话因为栈传参导致需要pop_2,pop_3之类的gadgets，从csu那里找就行（好吧我是不是没记录csu，改天写一个，不如就写在下面？）</li></ul><h2><span id="好用的welpwn和ida2pwntools">好用的welpwn和ida2pwntools</span></h2><ul><li>先说ida2pwntools, 这玩意贼好用，<code>from pwnlib.utils.proc import wait_for_debugger</code>之后直接f12可以弹出来。不过我可能得开始熟悉pwndbg了，毕竟更加灵活。（heapviewer真的太好用了啊！ida用得好其实问题并不大。。个人感觉）</li><li>welpwn的话，我觉得理念很好，常用工具就应该写一块重复造轮子干嘛！one_gadget, rop, libc_search就应该放一起呀，顺便提一下还有调libc顺便学习堆。pwn就应该变成art！所以自己也在下意识的积累自己的template，可以搞一波开发，顺便看看别人咋写的</li></ul><h2><span id="changld">changld</span></h2><p>再也不用担心libc不兼容！（其实还是担心，毕竟可能没有ld。。解决方案的话，我觉得多准备几个版本的虚拟机）</p><p>(好困呀，改天写怎么blind pwn 和 怎么 ret2csu. )</p>]]></content>
       
       
       
@@ -450,9 +469,9 @@
             
             <tag> ctf </tag>
             
-            <tag> ida </tag>
-            
             <tag> rop </tag>
+            
+            <tag> ida </tag>
             
         </tags>
       

@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://hustcw.github.io/"/>
-  <updated>2019-09-23T18:41:39.190Z</updated>
+  <updated>2020-08-06T08:27:29.990Z</updated>
   <id>https://hustcw.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>AFL记录</title>
+    <link href="https://hustcw.github.io/2020/08/06/AFL%E8%AE%B0%E5%BD%95/"/>
+    <id>https://hustcw.github.io/2020/08/06/AFL记录/</id>
+    <published>2020-08-06T08:24:09.000Z</published>
+    <updated>2020-08-06T08:27:29.990Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h2&gt;&lt;span id=&quot;写在前面&quot;&gt;写在前面&lt;/span&gt;&lt;/h2&gt;&lt;blockquote&gt;
+&lt;p&gt;记录AFL的使用和代码阅读&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2&gt;&lt;span
+        
+      
+    
+    </summary>
+    
+    
+      <category term="fuzz" scheme="https://hustcw.github.io/tags/fuzz/"/>
+    
+  </entry>
   
   <entry>
     <title>堆上的off-by-null</title>
@@ -91,12 +118,12 @@
     <link href="https://hustcw.github.io/2019/05/29/%E8%8D%92%E5%BA%9F%E5%B7%B2%E4%B9%85%E7%9A%84pwn%E5%A4%8D%E4%B9%A0%E6%80%BB%E7%BB%93/"/>
     <id>https://hustcw.github.io/2019/05/29/荒废已久的pwn复习总结/</id>
     <published>2019-05-28T16:34:57.000Z</published>
-    <updated>2019-09-23T18:38:52.265Z</updated>
+    <updated>2020-10-08T12:23:05.459Z</updated>
     
     <summary type="html">
     
       &lt;h2 id=&quot;写在前面&quot;&gt;&lt;a href=&quot;#写在前面&quot; class=&quot;headerlink&quot; title=&quot;写在前面&quot;&gt;&lt;/a&gt;写在前面&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;天哪感觉有一个世纪没有写过blog的样子，曾经高产似母猪。 竟然一个多月没动笔了（雾。。） 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。（其实就是没长进hhh）做了一些别的事情，作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。&lt;/p&gt;
+&lt;p&gt;天哪感觉有一个世纪没有写过blog的样子。 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。&lt;/p&gt;
 &lt;/blockquote&gt;
     
     </summary>
@@ -419,26 +446,6 @@
     
     
       <category term="machine learning" scheme="https://hustcw.github.io/tags/machine-learning/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>密码学小整理</title>
-    <link href="https://hustcw.github.io/2019/03/21/%E7%8E%B0%E4%BB%A3%E5%AF%86%E7%A0%81%E5%AD%A6%E2%80%94%E2%80%94%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E5%92%8C%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86/"/>
-    <id>https://hustcw.github.io/2019/03/21/现代密码学——对称加密和非对称加密/</id>
-    <published>2019-03-21T02:29:41.000Z</published>
-    <updated>2019-09-23T18:38:52.264Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h2 id=&quot;写在前面&quot;&gt;&lt;a href=&quot;#写在前面&quot; class=&quot;headerlink&quot; title=&quot;写在前面&quot;&gt;&lt;/a&gt;写在前面&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;学习网络安全协议的时候用到了很多现代密码学的知识，也重新去学习了现代密码学的应用。想要有体系的整理在这里。&lt;/p&gt;
-&lt;/blockquote&gt;
-    
-    </summary>
-    
-    
-      <category term="crypto" scheme="https://hustcw.github.io/tags/crypto/"/>
     
   </entry>
   

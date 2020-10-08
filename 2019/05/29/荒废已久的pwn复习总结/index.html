@@ -15,19 +15,19 @@
 
 
 
-<meta name="description" content="写在前面 天哪感觉有一个世纪没有写过blog的样子，曾经高产似母猪。 竟然一个多月没动笔了（雾。。） 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。（其实就是没长进hhh）做了一些别的事情，作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记">
+<meta name="description" content="写在前面 天哪感觉有一个世纪没有写过blog的样子。 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。">
 <meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
 <meta property="og:title" content="荒废已久的pwn复习总结">
 <meta property="og:url" content="https://hustcw.github.io/2019/05/29/荒废已久的pwn复习总结/index.html">
 <meta property="og:site_name" content="Hustcw">
-<meta property="og:description" content="写在前面 天哪感觉有一个世纪没有写过blog的样子，曾经高产似母猪。 竟然一个多月没动笔了（雾。。） 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。（其实就是没长进hhh）做了一些别的事情，作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记">
+<meta property="og:description" content="写在前面 天哪感觉有一个世纪没有写过blog的样子。 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://hustcw.github.io/assets/img/mmap-flags.jpg">
-<meta property="og:updated_time" content="2019-09-23T18:38:52.265Z">
+<meta property="og:updated_time" content="2020-10-08T12:23:05.459Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="荒废已久的pwn复习总结">
-<meta name="twitter:description" content="写在前面 天哪感觉有一个世纪没有写过blog的样子，曾经高产似母猪。 竟然一个多月没动笔了（雾。。） 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。（其实就是没长进hhh）做了一些别的事情，作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记">
+<meta name="twitter:description" content="写在前面 天哪感觉有一个世纪没有写过blog的样子。 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。">
 <meta name="twitter:image" content="https://hustcw.github.io/assets/img/mmap-flags.jpg">
 
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -173,7 +173,7 @@
                 
                 <section class="switch-part switch-part2">
                     <div class="widget tagcloud" id="js-tagcloud">
-                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/angr/">angr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crypto/">crypto</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/formatstr/">formatstr</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/glibc/">glibc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/heap/">heap</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ida/">ida</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/machine-learning/">machine learning</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/off-by-one/">off-by-one</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/plan/">plan</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rop/">rop</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/study/">study</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zip/">zip</a></li></ul>
                     </div>
                 </section>
                 
@@ -271,7 +271,7 @@
       
           
         <h2><span id="写在前面">写在前面</span></h2><blockquote>
-<p>天哪感觉有一个世纪没有写过blog的样子，曾经高产似母猪。 竟然一个多月没动笔了（雾。。） 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。（其实就是没长进hhh）做了一些别的事情，作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。</p>
+<p>天哪感觉有一个世纪没有写过blog的样子。 好吧其实这个月做了好多事情，ctf打的比较少了所以就没怎么写blog了。作品赛、学会掉机器学习的包玩玩nlp、疯狂尝试希望自己不要退学、 复习期末考试、 各种大作业。今天闲下来半夜写篇短的， 主要目的还是记录一下断断续续的一些知识点，然后过几天去国赛也得记得准备点素材。</p>
 </blockquote>
 <a id="more"></a>
 <h2><span id="奇妙的shellcode">奇妙的shellcode</span></h2><p>shellcode确实是一个奇妙的东西，不需要libc的情况下getshell的一个方法。绕过NX呢需要这两种条件，mprotect函数存在或者mmap存在，调用参数如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">mmap</span><span class="params">( <span class="keyword">void</span> *start , <span class="keyword">size_t</span> length , <span class="keyword">int</span> prot , <span class="keyword">int</span> flags , <span class="keyword">int</span> fd , <span class="keyword">off_t</span> offsize)</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">mprotect</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *start, <span class="keyword">size_t</span> len, <span class="keyword">int</span> prot)</span></span>;</span><br></pre></td></tr></table></figure></p>
@@ -284,8 +284,8 @@
 <li>先说ida2pwntools, 这玩意贼好用，<code>from pwnlib.utils.proc import wait_for_debugger</code>之后直接f12可以弹出来。不过我可能得开始熟悉pwndbg了，毕竟更加灵活。（heapviewer真的太好用了啊！ida用得好其实问题并不大。。个人感觉）</li>
 <li>welpwn的话，我觉得理念很好，常用工具就应该写一块重复造轮子干嘛！one_gadget, rop, libc_search就应该放一起呀，顺便提一下还有调libc顺便学习堆。pwn就应该变成art！所以自己也在下意识的积累自己的template，可以搞一波开发，顺便看看别人咋写的</li>
 </ul>
-<h2><span id="changld">changld</span></h2><p>妈妈再也不用担心libc不兼容！（其实还是担心，毕竟可能没有ld。。解决方案的话，我觉得多准备几个版本的虚拟机，啊明天就准备！）</p>
-<p>(好困呀，改天写怎么blind pwn 和 怎么 ret2csu. 晚安世界！)</p>
+<h2><span id="changld">changld</span></h2><p>再也不用担心libc不兼容！（其实还是担心，毕竟可能没有ld。。解决方案的话，我觉得多准备几个版本的虚拟机）</p>
+<p>(好困呀，改天写怎么blind pwn 和 怎么 ret2csu. )</p>
 
       
     </div>
@@ -297,7 +297,7 @@
         <p><span>本文标题:</span><a href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
         <p><span>发布时间:</span>2019-05-29, 00:34:57</p>
-        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
+        <p><span>最后更新:</span>2020-10-08, 20:23:05</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2019/05/29/荒废已久的pwn复习总结/" title="荒废已久的pwn复习总结">https://hustcw.github.io/2019/05/29/荒废已久的pwn复习总结/</a>
             <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/05/29/荒废已久的pwn复习总结/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -408,7 +408,7 @@
         
     </div>
 
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/08/06/AFL记录/">AFL记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
 
 
 
@@ -424,7 +424,7 @@
         <div id="footer-info">
             <div class="footer-left">
                 <i class="fa fa-copyright"></i> 
-                2018-2019 hustcw
+                2018-2020 hustcw
             </div>
             <div class="footer-right">
                 <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>

@@ -15,18 +15,14 @@
 
 
 
-<meta name="description" content="写在前面 真的是个奇奇怪怪的问题，打开机器突然ping不通虚拟机了，中间还逼得我复习了一下计网。  vmnet8vmnet8是host和虚拟机的NAT网络的网卡，默认情况下mac到NAT网段的连接应该是直连的！直连的！我还傻乎乎的去改路由表。一般情况下只要虚拟机ip和vmnet8在同一个网段内，默认网关是192.168.xxx.2,vmnet8的地址是192.168.xxx.2. mac下查看路由">
-<meta name="keywords" content="mac">
-<meta property="og:type" content="article">
-<meta property="og:title" content="VMware Fusion NAT无法连接网络">
-<meta property="og:url" content="https://hustcw.github.io/2019/04/03/VMware-Fusion-NAT无法连接网络/index.html">
+<meta name="keywords" content="ctf">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hustcw">
+<meta property="og:url" content="https://hustcw.github.io/tags/fuzz/index.html">
 <meta property="og:site_name" content="Hustcw">
-<meta property="og:description" content="写在前面 真的是个奇奇怪怪的问题，打开机器突然ping不通虚拟机了，中间还逼得我复习了一下计网。  vmnet8vmnet8是host和虚拟机的NAT网络的网卡，默认情况下mac到NAT网段的连接应该是直连的！直连的！我还傻乎乎的去改路由表。一般情况下只要虚拟机ip和vmnet8在同一个网段内，默认网关是192.168.xxx.2,vmnet8的地址是192.168.xxx.2. mac下查看路由">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-09-23T18:38:52.261Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="VMware Fusion NAT无法连接网络">
-<meta name="twitter:description" content="写在前面 真的是个奇奇怪怪的问题，打开机器突然ping不通虚拟机了，中间还逼得我复习了一下计网。  vmnet8vmnet8是host和虚拟机的NAT网络的网卡，默认情况下mac到NAT网段的连接应该是直连的！直连的！我还傻乎乎的去改路由表。一般情况下只要虚拟机ip和vmnet8在同一个网段内，默认网关是192.168.xxx.2,vmnet8的地址是192.168.xxx.2. mac下查看路由">
+<meta name="twitter:title" content="Hustcw">
 
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
@@ -58,7 +54,7 @@
 <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
 
-<title>VMware Fusion NAT无法连接网络 | Hustcw</title>
+<title>Tag: fuzz | Hustcw</title>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.1/clipboard.min.js"></script>
@@ -68,9 +64,9 @@
         fancybox: true,
         animate: true,
         isHome: false,
-        isPost: true,
+        isPost: false,
         isArchive: false,
-        isTag: false,
+        isTag: true,
         isCategory: false,
         fancybox_js: "//cdnjs.cloudflare.com/ajax/libs/fancybox/3.3.5/jquery.fancybox.min.js",
         scrollreveal: "//cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/3.4.0/scrollreveal.min.js",
@@ -228,182 +224,55 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-VMware-Fusion-NAT无法连接网络" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap">
   
-    <div class="article-meta">
-      <a href="/2019/04/03/VMware-Fusion-NAT无法连接网络/" class="article-date">
-      <time datetime="2019-04-03T07:57:53.000Z" itemprop="datePublished">2019-04-03</time>
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2020" class="archive-year">2020</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+          <div class="article-meta">
+              <a href="/2020/08/06/AFL记录/" class="archive-article-date">
+      <time datetime="2020-08-06T08:24:09.000Z" itemprop="datePublished">08-06</time>
 </a>
 
 
-    </div>
+        </div>
+         
   
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      VMware Fusion NAT无法连接网络
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2020/08/06/AFL记录/">AFL记录</a>
     </h1>
   
 
-      </header>
-      
-      <div class="article-info article-info-post">
-        
-
-        
-    <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mac/">mac</a></li></ul>
-    </div>
-
-        <div class="clearfix"></div>
-      </div>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
+        <div class="article-info info-on-archive">
           
-        <h2><span id="写在前面">写在前面</span></h2><blockquote>
-<p>真的是个奇奇怪怪的问题，打开机器突然ping不通虚拟机了，中间还逼得我复习了一下计网。</p>
-</blockquote>
-<h2><span id="vmnet8">vmnet8</span></h2><p>vmnet8是host和虚拟机的NAT网络的网卡，默认情况下mac到NAT网段的连接应该是直连的！直连的！我还傻乎乎的去改路由表。一般情况下只要虚拟机ip和vmnet8在同一个网段内，默认网关是<code>192.168.xxx.2</code>,vmnet8的地址是<code>192.168.xxx.2</code>. mac下查看路由表信息是通过<code>route get xxx</code>. 查看路由表内容是通过<code>netstat -rn</code>.(在向豆豆请教的过程中发现有个repo叫做iproute2mac)</p>
-<h2><span id="重启vmware-network-service">重启vmware network service</span></h2><p>找了很多解决方案，最后突然发现连vmnet8都连不上！！！绝壁网卡down了，果断重启(感谢yjw同学的帮助)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop</span><br><span class="line">sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start</span><br></pre></td></tr></table></figure></p>
 
-      
-    </div>
-    
-  </div>
-  
-    
-    <div class="copyright">
-        <p><span>本文标题:</span><a href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></p>
-        <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
-        <p><span>发布时间:</span>2019-04-03, 15:57:53</p>
-        <p><span>最后更新:</span>2019-09-24, 02:38:52</p>
-        <p>
-            <span>原始链接:</span><a class="post-url" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/" title="VMware Fusion NAT无法连接网络">https://hustcw.github.io/2019/04/03/VMware-Fusion-NAT无法连接网络/</a>
-            <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2019/04/03/VMware-Fusion-NAT无法连接网络/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
-            <script> var clipboard = new Clipboard('.copy-path'); </script>
-        </p>
-        <p>
-            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
-        </p>
+          
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/fuzz/">fuzz</a></li></ul>
     </div>
 
-
-
-    <nav id="article-nav">
-        
-            <div id="article-nav-newer" class="article-nav-title">
-                <a href="/2019/04/05/转载-IDA代码类型转换/">
-                    转载:IDA代码类型转换
-                </a>
-            </div>
-        
-        
-            <div id="article-nav-older" class="article-nav-title">
-                <a href="/2019/04/02/堆利用/">
-                    堆利用
-                </a>
-            </div>
-        
-    </nav>
-
-  
-</article>
-
-    <div id="toc" class="toc-article">
-        <strong class="toc-title">文章目录</strong>
-        
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">vmnet8</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">重启vmware network service</span></a></li></ol>
-        
-    </div>
-    <style>
-        .left-col .switch-btn,
-        .left-col .switch-area {
-            display: none;
-        }
-        .toc-level-3 i,
-        .toc-level-3 ol {
-            display: none !important;
-        }
-    </style>
-
-    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
-
-    <script>
-        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
-    </script>
-
-
-
-    
-<div class="share">
-    
-        <div class="bdsharebuttonbox">
-            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
-            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
-            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
-            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
-            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
-            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
-            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
         </div>
-        <script>
-            window._bd_share_config={
-                "common":{"bdSnsKey":{},"bdText":"VMware Fusion NAT无法连接网络　| Hustcw　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
-        </script>
-    
+        <div class="clearfix"></div>
+    </header>
+  </div>
+</article>
+  
+  
+    </div></section>
+  
 
     
-</div>
-
-
-
-
-
-
-
-    
-
-
-<!-- 添加打赏功能 -->
-
-
-
-
-
-
-    <div class="scroll" id="post-nav-button">
-        
-            <a href="/2019/04/05/转载-IDA代码类型转换/" title="上一篇: 转载:IDA代码类型转换">
-                <i class="fa fa-angle-left"></i>
-            </a>
-        
-
-        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
-
-        
-            <a href="/2019/04/02/堆利用/" title="下一篇: 堆利用">
-                <i class="fa fa-angle-right"></i>
-            </a>
-        
-    </div>
-
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2020/08/06/AFL记录/">AFL记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/09/24/堆上的off-by-null/">堆上的off-by-null</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/12/装IDA-Key-Patch/">windows IDA key-patch</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/08/08/最近的事/">最近的事情</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/29/荒废已久的pwn复习总结/">荒废已久的pwn复习总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/05/03/ret2dl-runtime-resolve/">ret2dl_runtime_resolve</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/20/OSX装angr/">OSX装angr</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/19/DDCTF-2019-WriteUp/">DDCTF 2019 Writeup</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/11/堆利用——布局内存任意地址写/">堆利用——布局内存任意地址写</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/05/转载-IDA代码类型转换/">转载:IDA代码类型转换</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/03/VMware-Fusion-NAT无法连接网络/">VMware Fusion NAT无法连接网络</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/堆利用/">堆利用</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/04/02/padding-oracle-attack/">padding oracle attack</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/29/格式化字符串/">格式化字符串</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/openssl相关知识/">openssl相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/xargs命令/">xargs命令</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/一个有趣的包——tqdm/">一个有趣的包——tqdm</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/26/python-gpg模块使用/">Python-gnupg Usage</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/23/ctf中常用模块之binascii/">ctf中常用模块之binascii</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/22/underfitting-overfitting/">underfitting & overfitting</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/21/现代密码学——对称加密和非对称加密/">密码学小整理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/20/编译glibc遇到的问题/">编译glibc遇到的问题</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/19/二进制的一些基本操作/">准备pwn环境的一些基本操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/17/64位ROP练习/">64位ROP练习</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/zip的选择明文攻击/">zip的选择明文攻击</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/03/16/docker基本命令/">docker基本命令</a></li></ul>
-
-
-
-
-    <script>
-        
-    </script>
-
 
 </div>
       <footer id="footer">
