@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://hustcw.github.io/assets/img/afl-1.png">
 <meta property="og:image" content="https://hustcw.github.io/assets/img/afl-2.png">
-<meta property="og:updated_time" content="2020-11-16T05:34:30.106Z">
+<meta property="og:updated_time" content="2020-11-18T15:47:39.249Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AFL记录">
 <meta name="twitter:description" content="写在前面 记录AFL的使用和代码阅读">
@@ -302,6 +302,14 @@
 </li>
 </ul>
 <h2><span id="use-addresssanitizer">Use AddressSanitizer</span></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> AFL_USE_ASAN=1</span><br><span class="line">make clean all</span><br><span class="line">./afl-fuzz -m none ...</span><br></pre></td></tr></table></figure>
+<h2><span id="useful-paper">Useful Paper</span></h2><ul>
+<li><a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=9251057" target="_blank" rel="noopener">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=9251057</a><ul>
+<li>基于locality特性进行变异：如果一个byte变异有效，那么对附近的byte变异也可能有效，可以多加一些关注</li>
+<li>在AFL陷入无效deterministic变异时，及时打断它</li>
+<li>识别测试例中的hotspot字段（如header中各字段），然后优先变异这些字段。</li>
+</ul>
+</li>
+</ul>
 <h2><span id="参考资料">参考资料</span></h2><ul>
 <li><a href="https://www.freebuf.com/articles/system/191536.html" target="_blank" rel="noopener">AFL漏洞挖掘技术漫谈（一）：用AFL开始你的第一次Fuzzing</a></li>
 </ul>
@@ -316,7 +324,7 @@
         <p><span>本文标题:</span><a href="/2020/08/06/AFL记录/">AFL记录</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">hustcw</a></p>
         <p><span>发布时间:</span>2020-08-06, 16:24:09</p>
-        <p><span>最后更新:</span>2020-11-16, 13:34:30</p>
+        <p><span>最后更新:</span>2020-11-18, 23:47:39</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2020/08/06/AFL记录/" title="AFL记录">https://hustcw.github.io/2020/08/06/AFL记录/</a>
             <span class="copy-path" data-clipboard-text="原文: https://hustcw.github.io/2020/08/06/AFL记录/　　作者: hustcw" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -346,7 +354,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">AFL窗口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">Preparation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">Crash Classification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text">Use AddressSanitizer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">6.</span> <span class="toc-text">参考资料</span></a></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">1.</span> <span class="toc-text">写在前面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">2.</span> <span class="toc-text">AFL窗口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">3.</span> <span class="toc-text">Preparation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">4.</span> <span class="toc-text">Crash Classification</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text">Use AddressSanitizer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">6.</span> <span class="toc-text">Useful Paper</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#null"><span class="toc-number">7.</span> <span class="toc-text">参考资料</span></a></li></ol>
         
     </div>
     <style>
